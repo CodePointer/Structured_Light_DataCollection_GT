@@ -32,6 +32,8 @@ private:
 	string gray_code_suffix_;
 	string phase_name_;
 	string phase_suffix_;
+	string dyna_name_;
+	string dyna_suffix_;
 	string wait_name_;
 	string wait_suffix_;
 

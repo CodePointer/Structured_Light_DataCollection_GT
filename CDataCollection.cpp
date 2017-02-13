@@ -61,6 +61,8 @@ bool CDataCollection::Init()
 	this->gray_code_suffix_ = ".txt";
 	this->phase_name_ = "vPhase";
 	this->phase_suffix_ = ".bmp";
+	this->dyna_name_ = "dynaMat";
+	this->dyna_frame_suffix_ = ".bmp";
 	this->wait_name_ = "wait";
 	this->wait_suffix_ = ".bmp";
 
@@ -101,9 +103,10 @@ bool CDataCollection::CollectData()
 
 	// 循环采集数据
 	int nowGroupIdx = 0;
+	int maxGroupNum = 5;
 	cout << "Begin Collection." << endl;
 
-	while (true)
+	while (nowGroupIdx < maxGroupNum)
 	{
 		// 记录当前采集的组数
 		nowGroupIdx++;
@@ -127,7 +130,7 @@ bool CDataCollection::CollectData()
 			if (status)
 			{
 				Mat CamMat;
-				printf("Input(<y>, <e>, <x>:");
+				printf("Input(<y>, <e>:");
 				bool exit_flag = false;
 				while (true)
 				{
@@ -143,12 +146,6 @@ bool CDataCollection::CollectData()
 					{
 						printf("e\n");
 						exit_flag = true;
-						break;
-					}
-					else if (key == 'x')
-					{
-						printf("x\n");
-						exit_flag = false;
 						break;
 					}
 				}
@@ -233,6 +230,28 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 				CamMat.copyTo(this->phase_mats_[i]);
 			}
 		}
+	}
+	if (status)
+	{
+		status = this->sensor_manager_->UnloadPatterns();
+	}
+
+	// 填充dyna_mats_
+	if (status)
+	{
+		status = this->sensor_manager_->LoadPatterns(1,
+			this->pattern_path_,
+			this->dyna_name_,
+			this->dyna_frame_suffix_);
+	}
+	if (status)
+	{
+		status = this->sensor_manager_->SetProPicture(0);
+	}
+	if (status)
+	{
+		Mat CamMat = this->sensor_manager_->GetCamPicture();
+		CamMat.copyTo(this->phase_mats_[frameNum]);
 	}
 	if (status)
 	{
@@ -333,10 +352,21 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 	if (status)
 	{
 		CVisualization myCamera("DebugCamera");
-		int key = myCamera.Show(this->ipro_mats_[frameNum], 0, true, 0.5);
-		if (key == 'n')
+		int key;
+		while (true)
 		{
-			status = false;
+			key = myCamera.Show(this->ipro_mats_[frameNum], 500, true, 0.5);
+			key = myCamera.Show(this->dyna_mats_[frameNum], 500, false, 0.5);
+			if (key == 'y')
+			{
+				status = true;
+				break;
+			}
+			else if (key == 'n')
+			{
+				status = false;
+				break;
+			}
 		}
 	}
 
