@@ -399,13 +399,17 @@ bool CDataCollection::StorageData(int groupNum, int frameNum)
 	ss << groupNum;
 	string folderName;
 	ss >> folderName;
+	ss.clear();
+	ss << frameNum;
+	string frameName;
+	ss >> frameName;
 
 	// 保存动态帧信息
 	store.SetMatFileName(this->save_data_path_
 		+ folderName
 		+ "/"
 		+ this->dyna_frame_path_,
-		this->dyna_frame_name_,
+		this->dyna_frame_name_ + frameName,
 		this->dyna_frame_suffix_);
 	store.Store(&this->dyna_mats_[frameNum], 1);
 	
@@ -414,8 +418,18 @@ bool CDataCollection::StorageData(int groupNum, int frameNum)
 		+ folderName
 		+ "/"
 		+ this->ipro_frame_path_,
-		this->ipro_frame_name_,
+		this->ipro_frame_name_ + frameName,
 		this->ipro_frame_suffix_);
+	store.Store(&this->ipro_mats_[frameNum], 1);
+	FileStorage fs(this->save_data_path_
+		+ folderName
+		+ "/"
+		+ this->ipro_frame_path_
+		+ this->ipro_frame_name_
+		+ frameName
+		+ ".xml", FileStorage::WRITE);
+	fs << "ipro_mat" << this->ipro_mats_[frameNum];
+	fs.release();
 
 	return true;
 }

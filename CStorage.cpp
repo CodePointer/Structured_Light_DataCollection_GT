@@ -33,7 +33,6 @@ bool CStorage::Store(Mat * pictures, int num)
 		status = imwrite(
 			this->m_matFilePath	
 			+ this->m_matFileName 
-			+ IdxtoStr 
 			+ this->m_matFileSuffix,
 			pictures[i]);
 		if (!status)
