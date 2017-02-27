@@ -20,6 +20,7 @@ int CVisualization::Show(Mat pic, int time, bool norm, double zoom)
 	// 需要标准归一化的情况
 	if (norm)
 	{
+
 		// 确定Mat类别
 		int range = 0;
 		
@@ -30,6 +31,24 @@ int CVisualization::Show(Mat pic, int time, bool norm, double zoom)
 		else if (show.depth() == CV_16U)
 		{
 			range = 0xffff;
+		}
+		else if (show.depth() == CV_64F)
+		{
+			range = 0xffff;
+			Mat tmp;
+			tmp.create(show.size(), CV_16UC1);
+			for (int h = 0; h < show.size().height; h++)
+			{
+				for (int w = 0; w < show.size().width; w++)
+				{
+					double value;
+					value = show.at<double>(h, w);
+					if (value < 0)
+						value = 0;
+					tmp.at<ushort>(h, w) = (ushort)value;
+				}
+			}
+			tmp.copyTo(show);
 		}
 
 		// 找最大最小值

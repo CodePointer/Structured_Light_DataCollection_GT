@@ -62,16 +62,16 @@ bool CDataCollection::Init()
 	this->phase_name_ = "vPhase";
 	this->phase_suffix_ = ".bmp";
 	this->dyna_name_ = "dynaMat";
-	this->dyna_frame_suffix_ = ".bmp";
+	this->dyna_suffix_ = ".bmp";
 	this->wait_name_ = "wait";
 	this->wait_suffix_ = ".bmp";
 
 	// 存储路径与名称
-	this->save_data_path_ = "D:/Structured_Light_Data/20170111/";
-	this->dyna_frame_path_ = "dyna";
+	this->save_data_path_ = "D:/Structured_Light_Data/20170213/";
+	this->dyna_frame_path_ = "dyna/";
 	this->dyna_frame_name_ = "dyna_mat";
 	this->dyna_frame_suffix_ = ".png";
-	this->ipro_frame_path_ = "ipro";
+	this->ipro_frame_path_ = "ipro/";
 	this->ipro_frame_name_ = "ipro_mat";
 	this->ipro_frame_suffix_ = ".png";
 
@@ -110,7 +110,7 @@ bool CDataCollection::CollectData()
 	{
 		// 记录当前采集的组数
 		nowGroupIdx++;
-		printf("\tNow group: %d\n", nowGroupIdx);
+		printf("Now group: %d\n", nowGroupIdx);
 
 		// 采集数据
 		for (int frameIdx = 0; frameIdx < this->max_frame_num_; frameIdx++)
@@ -130,7 +130,7 @@ bool CDataCollection::CollectData()
 			if (status)
 			{
 				Mat CamMat;
-				printf("Input(<y>, <e>:");
+				printf("\tf[%d], Input(<y>, <e>:", frameIdx);
 				bool exit_flag = false;
 				while (true)
 				{
@@ -242,7 +242,7 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 		status = this->sensor_manager_->LoadPatterns(1,
 			this->pattern_path_,
 			this->dyna_name_,
-			this->dyna_frame_suffix_);
+			this->dyna_suffix_);
 	}
 	if (status)
 	{
@@ -251,7 +251,7 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 	if (status)
 	{
 		Mat CamMat = this->sensor_manager_->GetCamPicture();
-		CamMat.copyTo(this->phase_mats_[frameNum]);
+		CamMat.copyTo(this->dyna_mats_[frameNum]);
 	}
 	if (status)
 	{
@@ -299,7 +299,7 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 	}
 	if (status)
 	{
-		for (int i = 0; i < GRAY_V_NUMDIGIT * 2; i++)
+		for (int i = 0; i < PHASE_NUMDIGIT; i++)
 		{
 			if (status)
 			{
@@ -356,6 +356,16 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 		while (true)
 		{
 			key = myCamera.Show(this->ipro_mats_[frameNum], 500, true, 0.5);
+			if (key == 'y')
+			{
+				status = true;
+				break;
+			}
+			else if (key == 'n')
+			{
+				status = false;
+				break;
+			}
 			key = myCamera.Show(this->dyna_mats_[frameNum], 500, false, 0.5);
 			if (key == 'y')
 			{
