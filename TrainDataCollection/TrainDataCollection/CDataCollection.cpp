@@ -192,7 +192,11 @@ bool CDataCollection::CollectData()
 			}
 			else
 			{
-				this->StorageData(nowGroupIdx, frameIdx);
+				status = this->DecodeSingleFrame(frameIdx);
+				if (status)
+				{
+					this->StorageData(nowGroupIdx, frameIdx);
+				}
 			}
 		}
 	}
@@ -271,7 +275,7 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 	}
 	if (status)
 	{
-		for (int i = 0; i < GRAY_V_NUMDIGIT * 2; i++)
+		for (int i = 0; i < GRAY_H_NUMDIGIT * 2; i++)
 		{
 			if (status)
 			{
@@ -493,7 +497,7 @@ bool CDataCollection::DecodeSingleFrame(int frameNum)
 		tmp_phase_mat = hphase_decoder.GetResult();
 	}
 
-	// 合并结果至ipro
+	// 合并结果至jpro
 	if (status)
 	{
 		int hGrayNum = 1 << GRAY_H_NUMDIGIT;
@@ -518,7 +522,7 @@ bool CDataCollection::DecodeSingleFrame(int frameNum)
 					{
 						tmp_phase_mat.at<double>(h, w) = phaseVal + h_pixPeriod;
 					}
-					tmp_phase_mat.at<double>(h, w) = tmp_phase_mat.at<double>(h, w) - 0.5 * v_pixPeriod;
+					tmp_phase_mat.at<double>(h, w) = tmp_phase_mat.at<double>(h, w) - 0.5 * h_pixPeriod;
 				}
 			}
 		}
@@ -619,24 +623,24 @@ bool CDataCollection::StorageData(int groupNum, int frameNum)
 		this->ipro_frame_name_ + frameName,
 		this->ipro_frame_suffix_);
 	store.Store(&this->ipro_mats_[frameNum], 1);*/
-	FileStorage fs(this->save_data_path_
+	FileStorage fs_i(this->save_data_path_
 		+ folderName
 		+ "/"
 		+ this->pro_frame_path_
 		+ this->ipro_frame_name_
 		+ frameName
 		+ ".xml", FileStorage::WRITE);
-	fs << "ipro_mat" << this->ipro_mats_[frameNum];
-	fs.release();
-	FileStorage fs(this->save_data_path_
+	fs_i << "ipro_mat" << this->ipro_mats_[frameNum];
+	fs_i.release();
+	FileStorage fs_j(this->save_data_path_
 		+ folderName
 		+ "/"
 		+ this->pro_frame_path_
 		+ this->jpro_frame_name_
 		+ frameName
 		+ ".xml", FileStorage::WRITE);
-	fs << "jpro_mat" << this->jpro_mats_[frameNum];
-	fs.release();
+	fs_j << "jpro_mat" << this->jpro_mats_[frameNum];
+	fs_j.release();
 
 	return true;
 }
