@@ -19,18 +19,24 @@ private:
 	CSensor * sensor_manager_;
 
 	// 用于存储数据
-	Mat * gray_mats_;
-	Mat * phase_mats_;
+	Mat * vgray_mats_;
+	Mat * hgray_mats_;
+	Mat * vphase_mats_;
+	Mat * hphase_mats_;
 	Mat * dyna_mats_;
 	Mat * ipro_mats_;
+	Mat * jpro_mats_;
 
 	// 图案路径与名称
 	string pattern_path_;
-	string gray_name_;
+	string vgray_name_;
+	string hgray_name_;
 	string gray_suffix_;
-	string gray_code_name_;
+	string vgray_code_name_;
+	string hgray_code_name_;
 	string gray_code_suffix_;
-	string phase_name_;
+	string vphase_name_;
+	string hphase_name_;
 	string phase_suffix_;
 	string dyna_name_;
 	string dyna_suffix_;
@@ -42,8 +48,9 @@ private:
 	string dyna_frame_path_;
 	string dyna_frame_name_;
 	string dyna_frame_suffix_;
-	string ipro_frame_path_;
+	string pro_frame_path_;
 	string ipro_frame_name_;
+	string jpro_frame_name_;
 	string ipro_frame_suffix_;
 
 
@@ -54,6 +61,7 @@ private:
 
 	bool StorageData(int groupNum, int frameNum);
 	bool CollectSingleFrame(int frameNum);
+	bool DecodeSingleFrame(int frameNum);
 
 public:
 	CDataCollection();

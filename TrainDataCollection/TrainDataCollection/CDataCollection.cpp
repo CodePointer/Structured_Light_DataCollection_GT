@@ -3,8 +3,8 @@
 CDataCollection::CDataCollection()
 {
 	this->sensor_manager_ = NULL;
-	this->gray_mats_ = NULL;
-	this->phase_mats_ = NULL;
+	this->vgray_mats_ = NULL;
+	this->vphase_mats_ = NULL;
 	this->dyna_mats_ = NULL;
 	this->ipro_mats_ = NULL;
 
@@ -19,15 +19,25 @@ CDataCollection::~CDataCollection()
 		delete this->sensor_manager_;
 		this->sensor_manager_ = NULL;
 	}
-	if (this->gray_mats_ != NULL)
+	if (this->vgray_mats_ != NULL)
 	{
-		delete this->gray_mats_;
-		this->gray_mats_ = NULL;
+		delete this->vgray_mats_;
+		this->vgray_mats_ = NULL;
 	}
-	if (this->phase_mats_ != NULL)
+	if (this->hgray_mats_ != NULL)
 	{
-		delete this->phase_mats_;
-		this->phase_mats_ = NULL;
+		delete this->hgray_mats_;
+		this->hgray_mats_ = NULL;
+	}
+	if (this->vphase_mats_ != NULL)
+	{
+		delete this->vphase_mats_;
+		this->vphase_mats_ = NULL;
+	}
+	if (this->hphase_mats_ != NULL)
+	{
+		delete this->hphase_mats_;
+		this->hphase_mats_ = NULL;
 	}
 	if (this->dyna_mats_ != NULL)
 	{
@@ -38,6 +48,11 @@ CDataCollection::~CDataCollection()
 	{
 		delete this->ipro_mats_;
 		this->ipro_mats_ = NULL;
+	}
+	if (this->jpro_mats_ != NULL)
+	{
+		delete this->jpro_mats_;
+		this->jpro_mats_ = NULL;
 	}
 
 	return;
@@ -55,11 +70,14 @@ bool CDataCollection::Init()
 
 	// 图案路径与名称
 	this->pattern_path_ = "Patterns/";
-	this->gray_name_ = "vGray";
+	this->vgray_name_ = "vGray";
+	this->hgray_name_ = "hGray";
 	this->gray_suffix_ = ".bmp";
-	this->gray_code_name_ = "vGrayCode";
+	this->vgray_code_name_ = "vGrayCode";
+	this->hgray_code_name_ = "hGrayCode";
 	this->gray_code_suffix_ = ".txt";
-	this->phase_name_ = "vPhase";
+	this->vphase_name_ = "vPhase";
+	this->hphase_name_ = "hPhase";
 	this->phase_suffix_ = ".bmp";
 	this->dyna_name_ = "randDot";
 	this->dyna_suffix_ = ".bmp";
@@ -71,8 +89,9 @@ bool CDataCollection::Init()
 	this->dyna_frame_path_ = "dyna/";
 	this->dyna_frame_name_ = "dyna_mat";
 	this->dyna_frame_suffix_ = ".png";
-	this->ipro_frame_path_ = "ipro/";
+	this->pro_frame_path_ = "pro/";
 	this->ipro_frame_name_ = "ipro_mat";
+	this->jpro_frame_name_ = "jpro_mat";
 	this->ipro_frame_suffix_ = ".png";
 
 	// 初始化传感器
@@ -87,10 +106,13 @@ bool CDataCollection::Init()
 	}
 
 	// 初始化存储空间
-	this->gray_mats_ = new Mat[GRAY_V_NUMDIGIT * 2];
-	this->phase_mats_ = new Mat[PHASE_NUMDIGIT];
+	this->vgray_mats_ = new Mat[GRAY_V_NUMDIGIT * 2];
+	this->hgray_mats_ = new Mat[GRAY_H_NUMDIGIT * 2];
+	this->vphase_mats_ = new Mat[PHASE_NUMDIGIT];
+	this->hphase_mats_ = new Mat[PHASE_NUMDIGIT];
 	this->dyna_mats_ = new Mat[this->max_frame_num_];
 	this->ipro_mats_ = new Mat[this->max_frame_num_];
+	this->jpro_mats_ = new Mat[this->max_frame_num_];
 
 	return status;
 }
@@ -160,8 +182,11 @@ bool CDataCollection::CollectData()
 			}
 
 			// 采集并解码，保存
-			bool flag = this->CollectSingleFrame(frameIdx);
-			if (!flag)
+			if (status)
+			{
+				status = this->CollectSingleFrame(frameIdx);
+			}
+			if (!status)
 			{
 				frameIdx--;
 			}
@@ -180,12 +205,12 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 {
 	bool status = true;
 
-	// 填充gray_mats_
+	// 填充vgray_mats_
 	if (status)
 	{
 		status = this->sensor_manager_->LoadPatterns(GRAY_V_NUMDIGIT * 2,
 			this->pattern_path_,
-			this->gray_name_,
+			this->vgray_name_,
 			this->gray_suffix_);
 	}
 	if (status)
@@ -199,7 +224,7 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 			if (status)
 			{
 				Mat CamMat = this->sensor_manager_->GetCamPicture();
-				CamMat.copyTo(this->gray_mats_[i]);
+				CamMat.copyTo(this->vgray_mats_[i]);
 			}
 		}
 	}
@@ -208,12 +233,12 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 		status = this->sensor_manager_->UnloadPatterns();
 	}
 
-	// 填充phase_mats_
+	// 填充vphase_mats_
 	if (status)
 	{
 		status = this->sensor_manager_->LoadPatterns(PHASE_NUMDIGIT,
 			this->pattern_path_,
-			this->phase_name_,
+			this->vphase_name_,
 			this->phase_suffix_);
 	}
 	if (status)
@@ -227,7 +252,63 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 			if (status)
 			{
 				Mat CamMat = this->sensor_manager_->GetCamPicture();
-				CamMat.copyTo(this->phase_mats_[i]);
+				CamMat.copyTo(this->vphase_mats_[i]);
+			}
+		}
+	}
+	if (status)
+	{
+		status = this->sensor_manager_->UnloadPatterns();
+	}
+
+	// 填充hgray_mats_
+	if (status)
+	{
+		status = this->sensor_manager_->LoadPatterns(GRAY_H_NUMDIGIT * 2,
+			this->pattern_path_,
+			this->hgray_name_,
+			this->gray_suffix_);
+	}
+	if (status)
+	{
+		for (int i = 0; i < GRAY_V_NUMDIGIT * 2; i++)
+		{
+			if (status)
+			{
+				status = this->sensor_manager_->SetProPicture(i);
+			}
+			if (status)
+			{
+				Mat CamMat = this->sensor_manager_->GetCamPicture();
+				CamMat.copyTo(this->hgray_mats_[i]);
+			}
+		}
+	}
+	if (status)
+	{
+		status = this->sensor_manager_->UnloadPatterns();
+	}
+
+	// 填充hphase_mats_
+	if (status)
+	{
+		status = this->sensor_manager_->LoadPatterns(PHASE_NUMDIGIT,
+			this->pattern_path_,
+			this->hphase_name_,
+			this->phase_suffix_);
+	}
+	if (status)
+	{
+		for (int i = 0; i < PHASE_NUMDIGIT; i++)
+		{
+			if (status)
+			{
+				status = this->sensor_manager_->SetProPicture(i);
+			}
+			if (status)
+			{
+				Mat CamMat = this->sensor_manager_->GetCamPicture();
+				CamMat.copyTo(this->hphase_mats_[i]);
 			}
 		}
 	}
@@ -258,17 +339,25 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 		status = this->sensor_manager_->UnloadPatterns();
 	}
 
-	// gray解码
-	CDecodeGray gray_decoder;
+	return status;
+}
+
+
+bool CDataCollection::DecodeSingleFrame(int frameNum)
+{
+	bool status = true;
+
+	// vgray解码
+	CDecodeGray vgray_decoder;
 	Mat tmp_gray_mat;
 	if (status)
 	{
-		status = gray_decoder.SetNumDigit(GRAY_V_NUMDIGIT, true);
+		status = vgray_decoder.SetNumDigit(GRAY_V_NUMDIGIT, true);
 	}
 	if (status)
 	{
-		status = gray_decoder.SetMatFileName(this->pattern_path_,
-			this->gray_code_name_ + this->gray_code_suffix_);
+		status = vgray_decoder.SetMatFileName(this->pattern_path_,
+			this->vgray_code_name_ + this->gray_code_suffix_);
 	}
 	if (status)
 	{
@@ -276,26 +365,26 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 		{
 			if (status)
 			{
-				status = gray_decoder.SetMat(i, this->gray_mats_[i]);
+				status = vgray_decoder.SetMat(i, this->vgray_mats_[i]);
 			}
 		}
 	}
 	if (status)
 	{
-		status = gray_decoder.Decode();
+		status = vgray_decoder.Decode();
 	}
 	if (status)
 	{
-		tmp_gray_mat = gray_decoder.GetResult();
+		tmp_gray_mat = vgray_decoder.GetResult();
 	}
 
-	// phase解码
-	CDecodePhase phase_decoder;
+	// vphase解码
+	CDecodePhase vphase_decoder;
 	Mat tmp_phase_mat;
 	if (status)
 	{
 		int v_pixPeriod = PROJECTOR_RESLINE / (1 << GRAY_V_NUMDIGIT - 1);
-		status = phase_decoder.SetNumMat(PHASE_NUMDIGIT, v_pixPeriod);
+		status = vphase_decoder.SetNumMat(PHASE_NUMDIGIT, v_pixPeriod);
 	}
 	if (status)
 	{
@@ -303,20 +392,20 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 		{
 			if (status)
 			{
-				status = phase_decoder.SetMat(i, this->phase_mats_[i]);
+				status = vphase_decoder.SetMat(i, this->vphase_mats_[i]);
 			}
 		}
 	}
 	if (status)
 	{
-		status = phase_decoder.Decode();
+		status = vphase_decoder.Decode();
 	}
 	if (status)
 	{
-		tmp_phase_mat = phase_decoder.GetResult();
+		tmp_phase_mat = vphase_decoder.GetResult();
 	}
 
-	// 合并结果
+	// 合并结果至ipro
 	if (status)
 	{
 		int vGrayNum = 1 << GRAY_V_NUMDIGIT;
@@ -348,6 +437,94 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 		this->ipro_mats_[frameNum] = tmp_gray_mat + tmp_phase_mat;
 	}
 
+	// hgray解码
+	CDecodeGray hgray_decoder;
+	if (status)
+	{
+		status = hgray_decoder.SetNumDigit(GRAY_H_NUMDIGIT, true);
+	}
+	if (status)
+	{
+		status = hgray_decoder.SetMatFileName(this->pattern_path_,
+			this->hgray_code_name_ + this->gray_code_suffix_);
+	}
+	if (status)
+	{
+		for (int i = 0; i < GRAY_H_NUMDIGIT * 2; i++)
+		{
+			if (status)
+			{
+				status = hgray_decoder.SetMat(i, this->hgray_mats_[i]);
+			}
+		}
+	}
+	if (status)
+	{
+		status = hgray_decoder.Decode();
+	}
+	if (status)
+	{
+		tmp_gray_mat = hgray_decoder.GetResult();
+	}
+
+	// hphase解码
+	CDecodePhase hphase_decoder;
+	if (status)
+	{
+		int h_pixPeriod = PROJECTOR_RESLINE / (1 << GRAY_H_NUMDIGIT - 1);
+		status = hphase_decoder.SetNumMat(PHASE_NUMDIGIT, h_pixPeriod);
+	}
+	if (status)
+	{
+		for (int i = 0; i < PHASE_NUMDIGIT; i++)
+		{
+			if (status)
+			{
+				status = hphase_decoder.SetMat(i, this->hphase_mats_[i]);
+			}
+		}
+	}
+	if (status)
+	{
+		status = hphase_decoder.Decode();
+	}
+	if (status)
+	{
+		tmp_phase_mat = hphase_decoder.GetResult();
+	}
+
+	// 合并结果至ipro
+	if (status)
+	{
+		int hGrayNum = 1 << GRAY_H_NUMDIGIT;
+		int h_pixPeriod = PROJECTOR_RESLINE / (1 << GRAY_H_NUMDIGIT - 1);
+		int hGrayPeriod = PROJECTOR_RESLINE / hGrayNum;
+		for (int h = 0; h < CAMERA_RESROW; h++)
+		{
+			for (int w = 0; w < CAMERA_RESLINE; w++)
+			{
+				double grayVal = tmp_gray_mat.at<double>(h, w);
+				double phaseVal = tmp_phase_mat.at<double>(h, w);
+				if ((int)(grayVal / hGrayPeriod) % 2 == 0)
+				{
+					if (phaseVal >(double)h_pixPeriod * 0.75)
+					{
+						tmp_phase_mat.at<double>(h, w) = phaseVal - h_pixPeriod;
+					}
+				}
+				else
+				{
+					if (phaseVal < (double)h_pixPeriod * 0.25)
+					{
+						tmp_phase_mat.at<double>(h, w) = phaseVal + h_pixPeriod;
+					}
+					tmp_phase_mat.at<double>(h, w) = tmp_phase_mat.at<double>(h, w) - 0.5 * v_pixPeriod;
+				}
+			}
+		}
+		this->jpro_mats_[frameNum] = tmp_gray_mat + tmp_phase_mat;
+	}
+
 	// 确认是否正确采集
 	if (status)
 	{
@@ -356,6 +533,17 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 		while (true)
 		{
 			key = myCamera.Show(this->ipro_mats_[frameNum], 500, true, 0.5);
+			if (key == 'y')
+			{
+				status = true;
+				break;
+			}
+			else if (key == 'n')
+			{
+				status = false;
+				break;
+			}
+			key = myCamera.Show(this->jpro_mats_[frameNum], 500, true, 0.5);
 			if (key == 'y')
 			{
 				status = true;
@@ -434,11 +622,20 @@ bool CDataCollection::StorageData(int groupNum, int frameNum)
 	FileStorage fs(this->save_data_path_
 		+ folderName
 		+ "/"
-		+ this->ipro_frame_path_
+		+ this->pro_frame_path_
 		+ this->ipro_frame_name_
 		+ frameName
 		+ ".xml", FileStorage::WRITE);
 	fs << "ipro_mat" << this->ipro_mats_[frameNum];
+	fs.release();
+	FileStorage fs(this->save_data_path_
+		+ folderName
+		+ "/"
+		+ this->pro_frame_path_
+		+ this->jpro_frame_name_
+		+ frameName
+		+ ".xml", FileStorage::WRITE);
+	fs << "jpro_mat" << this->jpro_mats_[frameNum];
 	fs.release();
 
 	return true;
