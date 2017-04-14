@@ -15,7 +15,7 @@ int CVisualization::Show(Mat pic, int time, bool norm, double zoom)
 {
 	Mat show;
 	Size showSize = Size(pic.size().width*zoom, pic.size().height*zoom);
-	resize(pic, show, showSize);
+	resize(pic, show, showSize, 0.0, 0.0, INTER_NEAREST);
 	
 	// 需要标准归一化的情况
 	if (norm)

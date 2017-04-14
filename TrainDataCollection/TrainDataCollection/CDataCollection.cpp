@@ -7,6 +7,7 @@ CDataCollection::CDataCollection()
 	this->vphase_mats_ = NULL;
 	this->dyna_mats_ = NULL;
 	this->ipro_mats_ = NULL;
+	this->my_debug_ = NULL;
 
 	return;
 }
@@ -54,6 +55,11 @@ CDataCollection::~CDataCollection()
 		delete this->jpro_mats_;
 		this->jpro_mats_ = NULL;
 	}
+	if (this->my_debug_ != NULL)
+	{
+		delete this->my_debug_;
+		this->my_debug_ = NULL;
+	}
 
 	return;
 }
@@ -81,7 +87,7 @@ bool CDataCollection::Init()
 	this->phase_suffix_ = ".bmp";
 	this->dyna_name_ = "randDot";
 	this->dyna_suffix_ = ".bmp";
-	this->wait_name_ = "wait";
+	this->wait_name_ = "randDot";
 	this->wait_suffix_ = ".bmp";
 
 	// 存储路径与名称
@@ -113,6 +119,7 @@ bool CDataCollection::Init()
 	this->dyna_mats_ = new Mat[this->max_frame_num_];
 	this->ipro_mats_ = new Mat[this->max_frame_num_];
 	this->jpro_mats_ = new Mat[this->max_frame_num_];
+	this->my_debug_ = new CVisualization("Debug");
 
 	return status;
 }
@@ -122,7 +129,6 @@ bool CDataCollection::CollectData()
 {
 	bool status = true;
 	CVisualization myCamera("DebugCamera");
-	CVisualization myDebug("Debug");
 
 	// 循环采集数据
 	int nowGroupIdx = 0;
@@ -159,15 +165,15 @@ bool CDataCollection::CollectData()
 				{
 					CamMat = this->sensor_manager_->GetCamPicture();
 					Mat LittleMat = CamMat(Range(502, 523), Range(630, 651));
-					myDebug.Show(LittleMat, 100, false, 20);
-					int key = myCamera.Show(CamMat, 100, false, 0.5);
-					if (key == 'y')
+					int key1 = this->my_debug_->Show(LittleMat, 100, false, 20);
+					int key2 = myCamera.Show(CamMat, 100, false, 0.5);
+					if ((key1 == 'y') || (key2 == 'y'))
 					{
 						printf("y\n");
 						exit_flag = false;
 						break;
 					}
-					else if (key == 'e')
+					else if ((key1 == 'e') || (key2 == 'e'))
 					{
 						printf("e\n");
 						exit_flag = true;
@@ -189,22 +195,23 @@ bool CDataCollection::CollectData()
 			{
 				status = this->CollectSingleFrame(frameIdx);
 			}
+			if (status)
+			{
+				status = this->DecodeSingleFrame(frameIdx);
+			}
 			if (!status)
 			{
 				frameIdx--;
+				status = true;
 			}
 			else
 			{
-				status = this->DecodeSingleFrame(frameIdx);
-				if (status)
-				{
-					this->StorageData(nowGroupIdx, frameIdx);
-				}
+				status = this->StorageData(nowGroupIdx, frameIdx);
 			}
 		}
 	}
 
-	return true;
+	return status;
 }
 
 
@@ -418,12 +425,19 @@ bool CDataCollection::DecodeSingleFrame(int frameNum)
 		int vGrayNum = 1 << GRAY_V_NUMDIGIT;
 		int v_pixPeriod = PROJECTOR_RESLINE / (1 << GRAY_V_NUMDIGIT - 1);
 		int vGrayPeriod = PROJECTOR_RESLINE / vGrayNum;
+		//this->my_debug_->Show(tmp_gray_mat, 0, true, 0.5);
+		//this->my_debug_->Show(tmp_phase_mat, 0, true, 0.5);
 		for (int h = 0; h < CAMERA_RESROW; h++)
 		{
 			for (int w = 0; w < CAMERA_RESLINE; w++)
 			{
 				double grayVal = tmp_gray_mat.at<double>(h, w);
 				double phaseVal = tmp_phase_mat.at<double>(h, w);
+				if (grayVal < 0)
+				{
+					tmp_phase_mat.at<double>(h, w) = 0;
+					continue;
+				}
 				if ((int)(grayVal / vGrayPeriod) % 2 == 0)
 				{
 					if (phaseVal >(double)v_pixPeriod * 0.75)
@@ -441,6 +455,8 @@ bool CDataCollection::DecodeSingleFrame(int frameNum)
 				}
 			}
 		}
+		/*this->my_debug_->Show(tmp_gray_mat, 0, true, 0.5);
+		this->my_debug_->Show(tmp_phase_mat, 0, true, 0.5);*/
 		this->ipro_mats_[frameNum] = tmp_gray_mat + tmp_phase_mat;
 	}
 
@@ -448,7 +464,7 @@ bool CDataCollection::DecodeSingleFrame(int frameNum)
 	CDecodeGray hgray_decoder;
 	if (status)
 	{
-		status = hgray_decoder.SetNumDigit(GRAY_H_NUMDIGIT, true);
+		status = hgray_decoder.SetNumDigit(GRAY_H_NUMDIGIT, false);
 	}
 	if (status)
 	{
@@ -478,7 +494,7 @@ bool CDataCollection::DecodeSingleFrame(int frameNum)
 	CDecodePhase hphase_decoder;
 	if (status)
 	{
-		int h_pixPeriod = PROJECTOR_RESLINE / (1 << GRAY_H_NUMDIGIT - 1);
+		int h_pixPeriod = PROJECTOR_RESROW / (1 << GRAY_H_NUMDIGIT - 1);
 		status = hphase_decoder.SetNumMat(PHASE_NUMDIGIT, h_pixPeriod);
 	}
 	if (status)
@@ -504,14 +520,28 @@ bool CDataCollection::DecodeSingleFrame(int frameNum)
 	if (status)
 	{
 		int hGrayNum = 1 << GRAY_H_NUMDIGIT;
-		int h_pixPeriod = PROJECTOR_RESLINE / (1 << GRAY_H_NUMDIGIT - 1);
-		int hGrayPeriod = PROJECTOR_RESLINE / hGrayNum;
+		int h_pixPeriod = PROJECTOR_RESROW / (1 << GRAY_H_NUMDIGIT - 1);
+		int hGrayPeriod = PROJECTOR_RESROW / hGrayNum;
+		/*this->my_debug_->Show(tmp_gray_mat, 0, true, 0.5);
+		this->my_debug_->Show(tmp_phase_mat, 0, true, 0.5);*/
+
+		// Save
+		FileStorage fs("1.xml", FileStorage::WRITE);
+		fs << "gray_mat" << tmp_gray_mat;
+		fs << "phase_mat" << tmp_phase_mat;
+		fs.release();
+
 		for (int h = 0; h < CAMERA_RESROW; h++)
 		{
 			for (int w = 0; w < CAMERA_RESLINE; w++)
 			{
 				double grayVal = tmp_gray_mat.at<double>(h, w);
 				double phaseVal = tmp_phase_mat.at<double>(h, w);
+				if (grayVal < 0)
+				{
+					tmp_phase_mat.at<double>(h, w) = 0;
+					continue;
+				}
 				if ((int)(grayVal / hGrayPeriod) % 2 == 0)
 				{
 					if (phaseVal >(double)h_pixPeriod * 0.75)
@@ -529,17 +559,19 @@ bool CDataCollection::DecodeSingleFrame(int frameNum)
 				}
 			}
 		}
+		/*this->my_debug_->Show(tmp_gray_mat, 0, true, 0.5);
+		this->my_debug_->Show(tmp_phase_mat, 0, true, 0.5);*/
 		this->jpro_mats_[frameNum] = tmp_gray_mat + tmp_phase_mat;
+		//this->my_debug_->Show(this->jpro_mats_[frameNum], 0, true, 0.5);
 	}
 
 	// 确认是否正确采集
 	if (status)
 	{
-		CVisualization myCamera("DebugCamera");
 		int key;
 		while (true)
 		{
-			key = myCamera.Show(this->ipro_mats_[frameNum], 500, true, 0.5);
+			key = this->my_debug_->Show(this->ipro_mats_[frameNum], 500, true, 0.5);
 			if (key == 'y')
 			{
 				status = true;
@@ -550,7 +582,7 @@ bool CDataCollection::DecodeSingleFrame(int frameNum)
 				status = false;
 				break;
 			}
-			key = myCamera.Show(this->jpro_mats_[frameNum], 500, true, 0.5);
+			key = this->my_debug_->Show(this->jpro_mats_[frameNum], 500, true, 0.5);
 			if (key == 'y')
 			{
 				status = true;
@@ -561,7 +593,7 @@ bool CDataCollection::DecodeSingleFrame(int frameNum)
 				status = false;
 				break;
 			}
-			key = myCamera.Show(this->dyna_mats_[frameNum], 500, false, 0.5);
+			key = this->my_debug_->Show(this->dyna_mats_[frameNum], 500, false, 0.5);
 			if (key == 'y')
 			{
 				status = true;

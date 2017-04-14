@@ -154,7 +154,7 @@ bool CDecodePhase::Visualize()
 		}
 
 		// 显示最终解码结果（归一化）
-		this->m_visual->Show(this->m_result, 1000, true);
+		this->m_visual->Show(this->m_result, 1000, true, 0.5);
 	}
 	return true;
 }

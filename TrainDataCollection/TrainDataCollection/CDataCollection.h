@@ -53,6 +53,8 @@ private:
 	string jpro_frame_name_;
 	string ipro_frame_suffix_;
 
+	// visualization
+	CVisualization * my_debug_;
 
 	// 类内参数
 	bool visualize_flag_;
