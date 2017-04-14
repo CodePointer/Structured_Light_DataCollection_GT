@@ -122,6 +122,7 @@ bool CDataCollection::CollectData()
 {
 	bool status = true;
 	CVisualization myCamera("DebugCamera");
+	CVisualization myDebug("Debug");
 
 	// 循环采集数据
 	int nowGroupIdx = 0;
@@ -157,6 +158,8 @@ bool CDataCollection::CollectData()
 				while (true)
 				{
 					CamMat = this->sensor_manager_->GetCamPicture();
+					Mat LittleMat = CamMat(Range(502, 523), Range(630, 651));
+					myDebug.Show(LittleMat, 100, false, 20);
 					int key = myCamera.Show(CamMat, 100, false, 0.5);
 					if (key == 'y')
 					{
