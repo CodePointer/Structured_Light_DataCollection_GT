@@ -18,6 +18,8 @@ class CDataCollection
 private:
 	CSensor * sensor_manager_;
 
+	bool flag_ground_truth_;
+
 	// 用于存储数据
 	Mat * vgray_mats_;
 	Mat * hgray_mats_;
@@ -62,8 +64,10 @@ private:
 	int max_frame_num_;
 
 	bool StorageData(int groupNum, int frameNum);
+	int GetInputSignal(int frameNum);
 	bool CollectSingleFrame(int frameNum);
 	bool DecodeSingleFrame(int frameNum);
+	bool VisualizationForDynamicScene(int total_frame_num);
 
 public:
 	CDataCollection();

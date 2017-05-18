@@ -69,10 +69,13 @@ bool CDataCollection::Init()
 {
 	bool status = true;
 
+	// 手动设置
+	this->flag_ground_truth_ = false;
+	this->max_frame_num_ = 100;
+
 	// 类内参数设定
 	this->visualize_flag_ = true;
 	this->storage_flag_ = true;
-	this->max_frame_num_ = COLLECTION_MAX_FRAME;
 
 	// 图案路径与名称
 	this->pattern_path_ = "Patterns/";
@@ -128,7 +131,7 @@ bool CDataCollection::Init()
 bool CDataCollection::CollectData()
 {
 	bool status = true;
-	CVisualization myCamera("DebugCamera");
+	
 
 	// 循环采集数据
 	int nowGroupIdx = 0;
@@ -142,53 +145,23 @@ bool CDataCollection::CollectData()
 		printf("Now group: %d\n", nowGroupIdx);
 
 		// 采集数据
-		for (int frameIdx = 0; frameIdx < this->max_frame_num_; frameIdx++)
+		int frameIdx = 0;
+		for (frameIdx = 0; frameIdx < this->max_frame_num_; frameIdx++)
 		{
-			// 等待采集命令
+			// 等待Signal
 			if (status)
 			{
-				status = this->sensor_manager_->LoadPatterns(1,
-					this->pattern_path_,
-					this->wait_name_,
-					this->wait_suffix_);
-			}
-			if (status)
-			{
-				status = this->sensor_manager_->SetProPicture(0);
-			}
-			if (status)
-			{
-				Mat CamMat;
-				printf("\tf[%d], Input(<y>, <e>:", frameIdx);
-				bool exit_flag = false;
-				while (true)
+				int info = this->GetInputSignal(frameIdx);
+				if (info == 1)
 				{
-					CamMat = this->sensor_manager_->GetCamPicture();
-					Mat LittleMat = CamMat(Range(502, 523), Range(630, 651));
-					int key1 = this->my_debug_->Show(LittleMat, 100, false, 20);
-					int key2 = myCamera.Show(CamMat, 100, false, 0.5);
-					if ((key1 == 'y') || (key2 == 'y'))
-					{
-						printf("y\n");
-						exit_flag = false;
-						break;
-					}
-					else if ((key1 == 'e') || (key2 == 'e'))
-					{
-						printf("e\n");
-						exit_flag = true;
-						break;
-					}
+					continue;
 				}
-				if (exit_flag)
+				else if (info == 2)
 				{
 					break;
 				}
 			}
-			if (status)
-			{
-				this->sensor_manager_->UnloadPatterns();
-			}
+			
 
 			// 采集并解码，保存
 			if (status)
@@ -206,7 +179,24 @@ bool CDataCollection::CollectData()
 			}
 			else
 			{
-				status = this->StorageData(nowGroupIdx, frameIdx);
+				if (this->flag_ground_truth_)
+				{
+					status = this->StorageData(nowGroupIdx, frameIdx);
+				}
+			}
+		}
+
+		// 对于非真值数据，需要进行统一回顾并判断是否需要重新采集
+		if (!this->flag_ground_truth_) {
+			status = this->VisualizationForDynamicScene(frameIdx);
+			if (!status) {
+				nowGroupIdx--;
+				status = true;
+			}
+			else {
+				for (int i = 0; i < frameIdx; i++)
+					if (status)
+						status = this->StorageData(nowGroupIdx, i);
 			}
 		}
 	}
@@ -215,9 +205,95 @@ bool CDataCollection::CollectData()
 }
 
 
+int CDataCollection::GetInputSignal(int frameNum)
+{
+	// return:
+	//     0: Continue
+	//     1: End collection of this group
+	//     2: End collection of program
+	//     3: Error
+
+	int info = 0;
+
+	// 等待采集命令
+	if ((frameNum == 0) || (this->flag_ground_truth_))
+	{
+		CVisualization myCamera("DebugCamera");
+		bool status = true;
+		if (status)
+		{
+			status = this->sensor_manager_->LoadPatterns(1,
+				this->pattern_path_,
+				this->wait_name_,
+				this->wait_suffix_);
+		}
+		if (status)
+		{
+			status = this->sensor_manager_->SetProPicture(0);
+		}
+		if (status)
+		{
+			Mat CamMat;
+			printf("\tf[%d], Input(<y>, <e>:", frameNum);
+			while (true)
+			{
+				CamMat = this->sensor_manager_->GetCamPicture();
+				Mat LittleMat = CamMat(Range(502, 523), Range(630, 651));
+				int key1 = this->my_debug_->Show(LittleMat, 100, false, 20);
+				int key2 = myCamera.Show(CamMat, 100, false, 0.5);
+				if ((key1 == 'y') || (key2 == 'y'))
+				{
+					printf("y\n");
+					info = 0;
+					break;
+				}
+				else if ((key1 == 'e') || (key2 == 'e'))
+				{
+					printf("e\n");
+					info = 1;
+					break;
+				}
+			}
+		}
+		if (status)
+		{
+			this->sensor_manager_->UnloadPatterns();
+		}
+	}
+
+	return info;
+}
+
+
 bool CDataCollection::CollectSingleFrame(int frameNum)
 {
 	bool status = true;
+
+	// 填充dyna_mats_
+	if (status)
+	{
+		status = this->sensor_manager_->LoadPatterns(1,
+			this->pattern_path_,
+			this->dyna_name_,
+			this->dyna_suffix_);
+	}
+	if (status)
+	{
+		status = this->sensor_manager_->SetProPicture(0);
+	}
+	if (status)
+	{
+		Mat CamMat = this->sensor_manager_->GetCamPicture();
+		CamMat.copyTo(this->dyna_mats_[frameNum]);
+	}
+	if (status)
+	{
+		status = this->sensor_manager_->UnloadPatterns();
+	}
+	if ((frameNum > 0) && (!this->flag_ground_truth_))
+	{
+		return status;
+	}
 
 	// 填充vgray_mats_
 	if (status)
@@ -331,28 +407,6 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 		status = this->sensor_manager_->UnloadPatterns();
 	}
 
-	// 填充dyna_mats_
-	if (status)
-	{
-		status = this->sensor_manager_->LoadPatterns(1,
-			this->pattern_path_,
-			this->dyna_name_,
-			this->dyna_suffix_);
-	}
-	if (status)
-	{
-		status = this->sensor_manager_->SetProPicture(0);
-	}
-	if (status)
-	{
-		Mat CamMat = this->sensor_manager_->GetCamPicture();
-		CamMat.copyTo(this->dyna_mats_[frameNum]);
-	}
-	if (status)
-	{
-		status = this->sensor_manager_->UnloadPatterns();
-	}
-
 	return status;
 }
 
@@ -360,6 +414,11 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 bool CDataCollection::DecodeSingleFrame(int frameNum)
 {
 	bool status = true;
+
+	if ((frameNum > 0) && (!this->flag_ground_truth_))
+	{
+		return status;
+	}
 
 	// vgray解码
 	CDecodeGray vgray_decoder;
@@ -526,10 +585,10 @@ bool CDataCollection::DecodeSingleFrame(int frameNum)
 		this->my_debug_->Show(tmp_phase_mat, 0, true, 0.5);*/
 
 		// Save
-		FileStorage fs("1.xml", FileStorage::WRITE);
+		/*FileStorage fs("1.xml", FileStorage::WRITE);
 		fs << "gray_mat" << tmp_gray_mat;
 		fs << "phase_mat" << tmp_phase_mat;
-		fs.release();
+		fs.release();*/
 
 		for (int h = 0; h < CAMERA_RESROW; h++)
 		{
@@ -611,6 +670,46 @@ bool CDataCollection::DecodeSingleFrame(int frameNum)
 }
 
 
+bool CDataCollection::VisualizationForDynamicScene(int total_frame_num)
+{
+	int key;
+	bool status = true;
+	while (true) {
+		key = this->my_debug_->Show(this->ipro_mats_[0], 500, true, 0.5);
+		if (key == 'y')	{
+			status = true;
+			break;
+		}
+		else if (key == 'n') {
+			status = false;
+			break;
+		}
+		key = this->my_debug_->Show(this->jpro_mats_[0], 500, true, 0.5);
+		if (key == 'y') {
+			status = true;
+			break;
+		}
+		else if (key == 'n') {
+			status = false;
+			break;
+		}
+		for (int frame_idx = 0; frame_idx < total_frame_num; frame_idx++) {
+			key = this->my_debug_->Show(this->dyna_mats_[frame_idx], 100, false, 0.5);
+			if (key == 'y') {
+				status = true;
+				break;
+			}
+			else if (key == 'n') {
+				status = false;
+				break;
+			}
+		}
+	}
+
+	return status;
+}
+
+
 bool CDataCollection::Close()
 {
 	bool status = true;
@@ -679,3 +778,5 @@ bool CDataCollection::StorageData(int groupNum, int frameNum)
 
 	return true;
 }
+
+

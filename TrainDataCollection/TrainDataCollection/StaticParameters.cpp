@@ -27,7 +27,6 @@ const bool VISUAL_DEBUG = false;
 //const int CHESS_ROW = 6;
 
 // 数据采集相关参数
-const int COLLECTION_MAX_FRAME = 100;
 const string PROJECTOR_PATTERNPATH = "Patterns/";
 const string PROJECTOR_VGRAYNAME = "vGray";
 const string PROJECTOR_VGRAYCODENAME = "vGrayCode";
