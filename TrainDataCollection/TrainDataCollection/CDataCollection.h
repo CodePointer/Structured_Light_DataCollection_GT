@@ -25,9 +25,12 @@ private:
 	Mat * hgray_mats_;
 	Mat * vphase_mats_;
 	Mat * hphase_mats_;
-	Mat * dyna_mats_;
+	Mat * dyna_mats_4_;
+	Mat * dyna_mats_6_;
+	Mat * dyna_mats_8_;
 	Mat * ipro_mats_;
 	Mat * jpro_mats_;
+	Mat * other_mats_;
 
 	// 图案路径与名称
 	string pattern_path_;
@@ -40,7 +43,9 @@ private:
 	string vphase_name_;
 	string hphase_name_;
 	string phase_suffix_;
-	string dyna_name_;
+	string dyna_name_4_;
+	string dyna_name_6_;
+	string dyna_name_8_;
 	string dyna_suffix_;
 	string wait_name_;
 	string wait_suffix_;

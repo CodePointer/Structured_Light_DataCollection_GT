@@ -106,7 +106,11 @@ bool CSensor::LoadPatterns(int patternNum, string filePath, string fileName, str
 
 		if (tempMat.empty())
 		{
-			ErrorHandling("CSensor::LoadPatterns::<Read>, imread error, idx=" + idx2Str);
+			string file_name = this->m_filePath
+				+ this->m_fileName
+				+ idx2Str
+				+ this->m_fileSuffix;
+			ErrorHandling("CSensor::LoadPatterns::<Read>, imread error, idx=" + idx2Str + " file_path:" + file_name);
 		}
 	}
 

@@ -25,14 +25,20 @@ bool CStorage::Store(Mat * pictures, int num)
 	// ´æ´¢
 	for (int i = 0; i < num; i++)
 	{
-		std::strstream ss;
 		string IdxtoStr;
-		ss << i;
-		ss >> IdxtoStr;
+		if (num == 1) {
+			IdxtoStr = "";
+		}
+		else {
+			std::strstream ss;
+			ss << i;
+			ss >> IdxtoStr;
+		}
 
 		status = imwrite(
 			this->m_matFilePath	
 			+ this->m_matFileName 
+			+ IdxtoStr
 			+ this->m_matFileSuffix,
 			pictures[i]);
 		if (!status)
