@@ -5,6 +5,8 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TrainDataCollection", "TrainDataCollection\TrainDataCollection.vcxproj", "{5965ADDB-B11F-40BB-969C-FDE31F6B0BC6}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DynamicDataCollection", "DynamicDataCollection\DynamicDataCollection.vcxproj", "{75A8BB42-C697-4FBA-8D3F-E7BFF4E522C9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -21,6 +23,14 @@ Global
 		{5965ADDB-B11F-40BB-969C-FDE31F6B0BC6}.Release|x64.Build.0 = Release|x64
 		{5965ADDB-B11F-40BB-969C-FDE31F6B0BC6}.Release|x86.ActiveCfg = Release|Win32
 		{5965ADDB-B11F-40BB-969C-FDE31F6B0BC6}.Release|x86.Build.0 = Release|Win32
+		{75A8BB42-C697-4FBA-8D3F-E7BFF4E522C9}.Debug|x64.ActiveCfg = Debug|x64
+		{75A8BB42-C697-4FBA-8D3F-E7BFF4E522C9}.Debug|x64.Build.0 = Debug|x64
+		{75A8BB42-C697-4FBA-8D3F-E7BFF4E522C9}.Debug|x86.ActiveCfg = Debug|Win32
+		{75A8BB42-C697-4FBA-8D3F-E7BFF4E522C9}.Debug|x86.Build.0 = Debug|Win32
+		{75A8BB42-C697-4FBA-8D3F-E7BFF4E522C9}.Release|x64.ActiveCfg = Release|x64
+		{75A8BB42-C697-4FBA-8D3F-E7BFF4E522C9}.Release|x64.Build.0 = Release|x64
+		{75A8BB42-C697-4FBA-8D3F-E7BFF4E522C9}.Release|x86.ActiveCfg = Release|Win32
+		{75A8BB42-C697-4FBA-8D3F-E7BFF4E522C9}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
