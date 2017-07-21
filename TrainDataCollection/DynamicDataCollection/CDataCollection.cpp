@@ -45,11 +45,6 @@ CDataCollection::~CDataCollection()
 		delete[]this->dyna_mats_;
 		this->dyna_mats_ = NULL;
 	}
-	if (this->other_mats_ != NULL)
-	{
-		delete[]this->other_mats_;
-		this->other_mats_ = NULL;
-	}
 	if (this->ipro_mats_ != NULL)
 	{
 		delete[]this->ipro_mats_;
@@ -93,9 +88,9 @@ bool CDataCollection::Init()
 	this->vphase_name_ = "vPhase";
 	this->hphase_name_ = "hPhase";
 	this->phase_suffix_ = ".bmp";
-	this->dyna_name_ = "4RandDot";
+	this->dyna_name_ = "4RandDotBig";
 	this->dyna_suffix_ = ".png";
-	this->wait_name_ = "4RandDot";
+	this->wait_name_ = "4RandDotBig";
 	this->wait_suffix_ = ".png";
 
 	// ´æ´¢Â·¾¶ÓëÃû³Æ
@@ -369,6 +364,7 @@ bool CDataCollection::CollectDynamicFrame()
 	for (int frame_idx = 0; (frame_idx < this->max_frame_num_) && status; frame_idx++) {
 		Mat CamMat = this->sensor_manager_->GetCamPicture();
 		CamMat.copyTo(this->dyna_mats_[frame_idx]);
+		printf("\t\t%d frame.\n", frame_idx);
 	}
 	// Unload projector pattern
 	if (status) {
@@ -598,17 +594,13 @@ bool CDataCollection::StorageData(int groupNum)
 	ss << groupNum;
 	string folderName;
 	ss >> folderName;
-	ss.clear();
-	ss << frameNum;
-	string frameName;
-	ss >> frameName;
 
 	// Save dyna mats
 	store.SetMatFileName(this->save_data_path_
 		+ folderName
 		+ "/"
 		+ this->dyna_frame_path_,
-		this->dyna_frame_name_ + frameName,
+		this->dyna_frame_name_,
 		this->dyna_frame_suffix_);
 	store.Store(this->dyna_mats_, this->max_frame_num_);
 
@@ -618,14 +610,14 @@ bool CDataCollection::StorageData(int groupNum)
 		+ folderName
 		+ "/"
 		+ this->pro_frame_path_,
-		this->ipro_frame_name_ + frameName,
+		this->ipro_frame_name_,
 		this->ipro_frame_suffix_);
 	FileStorage fs_i(this->save_data_path_
 		+ folderName
 		+ "/"
 		+ this->pro_frame_path_
 		+ this->ipro_frame_name_
-		+ frameName
+		+ "0"
 		+ ".xml", FileStorage::WRITE);
 	fs_i << "ipro_mat" << this->ipro_mats_[0];
 	fs_i.release();
@@ -634,7 +626,7 @@ bool CDataCollection::StorageData(int groupNum)
 		+ "/"
 		+ this->pro_frame_path_
 		+ this->jpro_frame_name_
-		+ frameName
+		+ "0"
 		+ ".xml", FileStorage::WRITE);
 	fs_j << "jpro_mat" << this->jpro_mats_[0];
 	fs_j.release();
