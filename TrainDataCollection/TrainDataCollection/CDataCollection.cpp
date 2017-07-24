@@ -5,10 +5,7 @@ CDataCollection::CDataCollection()
 	this->sensor_manager_ = NULL;
 	this->vgray_mats_ = NULL;
 	this->vphase_mats_ = NULL;
-	this->dyna_mats_4_ = NULL;
-	this->dyna_mats_6_ = NULL;
-	this->dyna_mats_8_ = NULL;
-	this->other_mats_ = NULL;
+	this->dyna_mats_ = NULL;
 	this->ipro_mats_ = NULL;
 	this->my_debug_ = NULL;
 
@@ -43,25 +40,10 @@ CDataCollection::~CDataCollection()
 		delete[]this->hphase_mats_;
 		this->hphase_mats_ = NULL;
 	}
-	if (this->dyna_mats_4_ != NULL)
+	if (this->dyna_mats_ != NULL)
 	{
-		delete[]this->dyna_mats_4_;
-		this->dyna_mats_4_ = NULL;
-	}
-	if (this->dyna_mats_6_ != NULL)
-	{
-		delete[]this->dyna_mats_6_;
-		this->dyna_mats_6_ = NULL;
-	}
-	if (this->dyna_mats_8_ != NULL)
-	{
-		delete[]this->dyna_mats_8_;
-		this->dyna_mats_8_ = NULL;
-	}
-	if (this->other_mats_ != NULL)
-	{
-		delete[]this->other_mats_;
-		this->other_mats_ = NULL;
+		delete[]this->dyna_mats_;
+		this->dyna_mats_ = NULL;
 	}
 	if (this->ipro_mats_ != NULL)
 	{
@@ -106,15 +88,13 @@ bool CDataCollection::Init()
 	this->vphase_name_ = "vPhase";
 	this->hphase_name_ = "hPhase";
 	this->phase_suffix_ = ".bmp";
-	this->dyna_name_4_ = "4RandDot";
-	this->dyna_name_6_ = "6RandDot";
-	this->dyna_name_8_ = "8RandDot";
+	this->dyna_name_ = "4RandDot";
 	this->dyna_suffix_ = ".png";
 	this->wait_name_ = "4RandDot";
 	this->wait_suffix_ = ".png";
 
 	// 存储路径与名称
-	this->save_data_path_ = "E:/Structured_Light_Data/20170630/";
+	this->save_data_path_ = "E:/Structured_Light_Data/20170724/";
 	this->dyna_frame_path_ = "dyna/";
 	this->dyna_frame_name_ = "dyna_mat";
 	this->dyna_frame_suffix_ = ".png";
@@ -139,12 +119,9 @@ bool CDataCollection::Init()
 	this->hgray_mats_ = new Mat[GRAY_H_NUMDIGIT * 2];
 	this->vphase_mats_ = new Mat[PHASE_NUMDIGIT];
 	this->hphase_mats_ = new Mat[PHASE_NUMDIGIT];
-	this->dyna_mats_4_ = new Mat[this->max_frame_num_];
-	this->dyna_mats_6_ = new Mat[this->max_frame_num_];
-	this->dyna_mats_8_ = new Mat[this->max_frame_num_];
+	this->dyna_mats_ = new Mat[this->max_frame_num_];
 	this->ipro_mats_ = new Mat[this->max_frame_num_];
 	this->jpro_mats_ = new Mat[this->max_frame_num_];
-	this->other_mats_ = new Mat[40];
 	this->my_debug_ = new CVisualization("Debug");
 
 	return status;
@@ -201,26 +178,7 @@ bool CDataCollection::CollectData()
 			}
 			else
 			{
-				if (this->flag_ground_truth_) {
-					status = this->StorageData(nowGroupIdx, frameIdx);
-				}
-				else {
-					printf("%d frame.\n", frameIdx);
-				}
-			}
-		}
-
-		// 对于非真值数据，需要进行统一回顾并判断是否需要重新采集
-		if (!this->flag_ground_truth_) {
-			status = this->VisualizationForDynamicScene(frameIdx);
-			if (!status) {
-				nowGroupIdx--;
-				status = true;
-			}
-			else {
-				for (int i = 0; i < frameIdx; i++)
-					if (status)
-						status = this->StorageData(nowGroupIdx, i);
+				status = this->StorageData(nowGroupIdx, frameIdx);
 			}
 		}
 	}
@@ -293,12 +251,12 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 {
 	bool status = true;
 
-	// 填充dyna_mats_4_
+	// 填充dyna_mats_
 	if (status)
 	{
 		status = this->sensor_manager_->LoadPatterns(1,
 			this->pattern_path_,
-			this->dyna_name_4_,
+			this->dyna_name_,
 			this->dyna_suffix_);
 	}
 	if (status)
@@ -308,65 +266,11 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 	if (status)
 	{
 		Mat CamMat = this->sensor_manager_->GetCamPicture();
-		CamMat.copyTo(this->dyna_mats_4_[frameNum]);
+		CamMat.copyTo(this->dyna_mats_[frameNum]);
 	}
 	if (status)
 	{
 		status = this->sensor_manager_->UnloadPatterns();
-	}
-	if ((frameNum > 0) && (!this->flag_ground_truth_))
-	{
-		return status;
-	}
-	// 填充dyna_mats_6_
-	if (status)
-	{
-		status = this->sensor_manager_->LoadPatterns(1,
-			this->pattern_path_,
-			this->dyna_name_6_,
-			this->dyna_suffix_);
-	}
-	if (status)
-	{
-		status = this->sensor_manager_->SetProPicture(0);
-	}
-	if (status)
-	{
-		Mat CamMat = this->sensor_manager_->GetCamPicture();
-		CamMat.copyTo(this->dyna_mats_6_[frameNum]);
-	}
-	if (status)
-	{
-		status = this->sensor_manager_->UnloadPatterns();
-	}
-	if ((frameNum > 0) && (!this->flag_ground_truth_))
-	{
-		return status;
-	}
-	// 填充dyna_mats_8_
-	if (status)
-	{
-		status = this->sensor_manager_->LoadPatterns(1,
-			this->pattern_path_,
-			this->dyna_name_8_,
-			this->dyna_suffix_);
-	}
-	if (status)
-	{
-		status = this->sensor_manager_->SetProPicture(0);
-	}
-	if (status)
-	{
-		Mat CamMat = this->sensor_manager_->GetCamPicture();
-		CamMat.copyTo(this->dyna_mats_8_[frameNum]);
-	}
-	if (status)
-	{
-		status = this->sensor_manager_->UnloadPatterns();
-	}
-	if ((frameNum > 0) && (!this->flag_ground_truth_))
-	{
-		return status;
 	}
 
 	// 填充vgray_mats_
@@ -478,52 +382,6 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 	}
 	if (status)
 	{
-		status = this->sensor_manager_->UnloadPatterns();
-	}
-
-	// Fill other_mats_
-	if (status) {
-		status = this->sensor_manager_->LoadPatterns(4,
-			this->pattern_path_,
-			"ColorDot",
-			".png");
-	}
-	if (status) {
-		for (int i = 0; i < 4; i++) {
-			if (status) {
-				status = this->sensor_manager_->SetProPicture(i);
-			}
-			if (status) {
-				for (int j = 0; j < 5; j++) {
-					Mat CamMat = this->sensor_manager_->GetCamPicture();
-					CamMat.copyTo(this->other_mats_[i * 5 + j]);
-				}
-			}
-		}
-	}
-	if (status) {
-		status = this->sensor_manager_->UnloadPatterns();
-	}
-	if (status) {
-		status = this->sensor_manager_->LoadPatterns(4,
-			this->pattern_path_,
-			"4RandDot",
-			".png");
-	}
-	if (status) {
-		for (int i = 0; i < 4; i++) {
-			if (status) {
-				status = this->sensor_manager_->SetProPicture(i);
-			}
-			if (status) {
-				for (int j = 0; j < 5; j++) {
-					Mat CamMat = this->sensor_manager_->GetCamPicture();
-					CamMat.copyTo(this->other_mats_[i * 5 + j + 20]);
-				}
-			}
-		}
-	}
-	if (status) {
 		status = this->sensor_manager_->UnloadPatterns();
 	}
 
@@ -772,29 +630,7 @@ bool CDataCollection::DecodeSingleFrame(int frameNum)
 				status = false;
 				break;
 			}
-			key = this->my_debug_->Show(this->dyna_mats_4_[frameNum], 500, false, 0.5);
-			if (key == 'y')
-			{
-				status = true;
-				break;
-			}
-			else if (key == 'n')
-			{
-				status = false;
-				break;
-			}
-			key = this->my_debug_->Show(this->dyna_mats_6_[frameNum], 500, false, 0.5);
-			if (key == 'y')
-			{
-				status = true;
-				break;
-			}
-			else if (key == 'n')
-			{
-				status = false;
-				break;
-			}
-			key = this->my_debug_->Show(this->dyna_mats_8_[frameNum], 500, false, 0.5);
+			key = this->my_debug_->Show(this->dyna_mats_[frameNum], 500, false, 0.5);
 			if (key == 'y')
 			{
 				status = true;
@@ -836,7 +672,7 @@ bool CDataCollection::VisualizationForDynamicScene(int total_frame_num)
 			break;
 		}
 		for (int frame_idx = 0; frame_idx < total_frame_num; frame_idx++) {
-			key = this->my_debug_->Show(this->dyna_mats_4_[frame_idx], 100, false, 0.5);
+			key = this->my_debug_->Show(this->dyna_mats_[frame_idx], 100, false, 0.5);
 			if (key == 'y') {
 				status = true;
 				break;
@@ -887,49 +723,9 @@ bool CDataCollection::StorageData(int groupNum, int frameNum)
 		+ folderName
 		+ "/"
 		+ this->dyna_frame_path_,
-		this->dyna_name_4_ + frameName,
+		this->dyna_name_ + frameName,
 		this->dyna_frame_suffix_);
-	store.Store(&this->dyna_mats_4_[frameNum], 1);
-	store.SetMatFileName(this->save_data_path_
-		+ folderName
-		+ "/"
-		+ this->dyna_frame_path_,
-		this->dyna_name_6_ + frameName,
-		this->dyna_frame_suffix_);
-	store.Store(&this->dyna_mats_6_[frameNum], 1);
-	store.SetMatFileName(this->save_data_path_
-		+ folderName
-		+ "/"
-		+ this->dyna_frame_path_,
-		this->dyna_name_8_ + frameName,
-		this->dyna_frame_suffix_);
-	store.Store(&this->dyna_mats_8_[frameNum], 1);
-
-	// Save other_mats_
-	for (int i = 0; i < 4; i++) {
-		ss.clear();
-		string i2num;
-		ss << i;
-		ss >> i2num;
-		store.SetMatFileName(this->save_data_path_
-			+ folderName + "/"
-			+ "other/",
-			"PureColor_" + i2num + "_",
-			".png");
-		store.Store(&this->other_mats_[i * 5], 5);
-	}
-	for (int i = 0; i < 4; i++) {
-		ss.clear();
-		string i2num;
-		ss << i;
-		ss >> i2num;
-		store.SetMatFileName(this->save_data_path_
-			+ folderName + "/"
-			+ "other/",
-			"RandColor_" + i2num + "_",
-			".png");
-		store.Store(&this->other_mats_[i * 5 + 20], 5);
-	}
+	store.Store(&this->dyna_mats_[frameNum], 1);
 	
 	// 保存对应的真值信息
 	/*store.SetMatFileName(this->save_data_path_
