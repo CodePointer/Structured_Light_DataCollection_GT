@@ -256,6 +256,12 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 {
 	bool status = true;
 
+	int kMultiCollectNum = 5;
+	Mat tmp_mul_collet;
+	Mat temp_total_mat;
+	Mat temp_mat;
+	temp_total_mat.create(CAMERA_RESROW, CAMERA_RESLINE, CV_64FC1);
+
 	// vgray_mats_
 	if (status) {
 		status = this->sensor_manager_->LoadPatterns(GRAY_V_NUMDIGIT * 2,
@@ -267,8 +273,13 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 		for (int i = 0; (i < GRAY_V_NUMDIGIT * 2) && status; i++) {
 			status = this->sensor_manager_->SetProPicture(i);
 			if (status) {
-				Mat CamMat = this->sensor_manager_->GetCamPicture();
-				CamMat.copyTo(this->vgray_mats_[i]);
+				temp_total_mat.setTo(0);
+				for (int k = 0; k < kMultiCollectNum; k++) {
+					tmp_mul_collect = this->sensor_manager_->GetCamPicture();
+					tmp_mul_collect.convertTo(temp_mat, CV_64FC1);
+					temp_total_mat += temp_mat / kMultiCollectNum;
+				}
+				temp_total_mat.convertTo(this->vgray_mats_[i], CV_8UC1);
 			}
 		}
 	}
@@ -287,8 +298,13 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 		for (int i = 0; (i < PHASE_NUMDIGIT) && status; i++) {
 			status = this->sensor_manager_->SetProPicture(i);
 			if (status) {
-				Mat CamMat = this->sensor_manager_->GetCamPicture();
-				CamMat.copyTo(this->vphase_mats_[i]);
+				temp_total_mat.setTo(0);
+				for (int k = 0; k < kMultiCollectNum; k++) {
+					tmp_mul_collect = this->sensor_manager_->GetCamPicture();
+					tmp_mul_collect.convertTo(temp_mat, CV_64FC1);
+					temp_total_mat += temp_mat / kMultiCollectNum;
+				}
+				temp_total_mat.convertTo(this->vphase_mats_[i], CV_8UC1);
 			}
 		}
 	}
@@ -307,8 +323,13 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 		for (int i = 0; (i < GRAY_H_NUMDIGIT * 2) && status; i++) {
 			status = this->sensor_manager_->SetProPicture(i);
 			if (status) {
-				Mat CamMat = this->sensor_manager_->GetCamPicture();
-				CamMat.copyTo(this->hgray_mats_[i]);
+				temp_total_mat.setTo(0);
+				for (int k = 0; k < kMultiCollectNum; k++) {
+					tmp_mul_collect = this->sensor_manager_->GetCamPicture();
+					tmp_mul_collect.convertTo(temp_mat, CV_64FC1);
+					temp_total_mat += temp_mat / kMultiCollectNum;
+				}
+				temp_total_mat.convertTo(this->hgray_mats_[i], CV_8UC1);
 			}
 		}
 	}
@@ -327,8 +348,13 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 		for (int i = 0; (i < PHASE_NUMDIGIT) && status; i++) {
 			status = this->sensor_manager_->SetProPicture(i);
 			if (status) {
-				Mat CamMat = this->sensor_manager_->GetCamPicture();
-				CamMat.copyTo(this->hphase_mats_[i]);
+				temp_total_mat.setTo(0);
+				for (int k = 0; k < kMultiCollectNum; k++) {
+					tmp_mul_collect = this->sensor_manager_->GetCamPicture();
+					tmp_mul_collect.convertTo(temp_mat, CV_64FC1);
+					temp_total_mat += temp_mat / kMultiCollectNum;
+				}
+				temp_total_mat.convertTo(this->hphase_mats_[i], CV_8UC1);
 			}
 		}
 	}
