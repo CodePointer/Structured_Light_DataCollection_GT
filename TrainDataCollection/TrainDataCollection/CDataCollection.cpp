@@ -98,11 +98,11 @@ bool CDataCollection::Init()
 	this->dyna_suffix_ = ".png";
 	this->flow_name_ = "pattern_optflow";
 	this->flow_suffix_ = ".png";
-	this->wait_name_ = "4RandDot";
+	this->wait_name_ = "pattern_3size6color";
 	this->wait_suffix_ = ".png";
 
 	// ´æ´¢Â·¾¶ÓëÃû³Æ
-	this->save_data_path_ = "E:/Structured_Light_Data/20170724/";
+	this->save_data_path_ = "E:/Structured_Light_Data/20170919/";
 	this->dyna_frame_path_ = "dyna/";
 	this->dyna_frame_name_ = "dyna_mat";
 	this->dyna_frame_suffix_ = ".png";
@@ -261,7 +261,7 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 	bool status = true;
 
 	int kMultiCollectNum = 5;
-	Mat tmp_mul_collet;
+	Mat tmp_mul_collect;
 	Mat temp_total_mat;
 	Mat temp_mat;
 	temp_total_mat.create(CAMERA_RESROW, CAMERA_RESLINE, CV_64FC1);
