@@ -262,6 +262,24 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 	Mat temp_mat;
 	temp_total_mat.create(CAMERA_RESROW, CAMERA_RESLINE, CV_64FC1);
 
+	// flow_mat
+	if (status) {
+		status = this->sensor_manager_->LoadPatterns(1,
+			this->pattern_path_,
+			this->flow_name_,
+			this->flow_suffix_);
+	}
+	if (status) {
+		status = this->sensor_manager_->SetProPicture(0);
+	}
+	if (status) {
+		Mat CamMat = this->sensor_manager_->GetCamPicture();
+		CamMat.copyTo(this->flow_mat_);
+	}
+	if (status) {
+		status = this->sensor_manager_->UnloadPatterns();
+	}
+
 	// vgray_mats_
 	if (status) {
 		status = this->sensor_manager_->LoadPatterns(GRAY_V_NUMDIGIT * 2,
@@ -630,6 +648,14 @@ bool CDataCollection::StorageData(int groupNum)
 		this->dyna_frame_suffix_);
 	store.Store(this->dyna_mats_, this->max_frame_num_);
 
+	// Save flow_mat
+	store.SetMatFileName(this->save_data_path_
+		+ folderName
+		+ "/"
+		+ this->pro_frame_path_,
+		this->flow_name_,
+		this->dyna_frame_suffix_);
+	store.Store(&this->flow_mat_, 1);
 
 	// Save ipro & jpro
 	store.SetMatFileName(this->save_data_path_
@@ -645,7 +671,7 @@ bool CDataCollection::StorageData(int groupNum)
 		+ this->ipro_frame_name_
 		+ "0"
 		+ ".xml", FileStorage::WRITE);
-	fs_i << "ipro_mat" << this->ipro_mats_[0];
+	fs_i << "xpro_mat" << this->ipro_mats_[0];
 	fs_i.release();
 	FileStorage fs_j(this->save_data_path_
 		+ folderName
@@ -654,7 +680,7 @@ bool CDataCollection::StorageData(int groupNum)
 		+ this->jpro_frame_name_
 		+ "0"
 		+ ".xml", FileStorage::WRITE);
-	fs_j << "jpro_mat" << this->jpro_mats_[0];
+	fs_j << "ypro_mat" << this->jpro_mats_[0];
 	fs_j.release();
 
 	return true;

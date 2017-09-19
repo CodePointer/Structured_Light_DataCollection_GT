@@ -26,6 +26,7 @@ private:
 	Mat * vphase_mats_;
 	Mat * hphase_mats_;
 	Mat * dyna_mats_;
+	Mat * flow_mats_;
 	Mat * ipro_mats_;
 	Mat * jpro_mats_;
 
@@ -42,6 +43,8 @@ private:
 	string phase_suffix_;
 	string dyna_name_;
 	string dyna_suffix_;
+	string flow_name_;
+	string flow_suffix_;
 	string wait_name_;
 	string wait_suffix_;
 
