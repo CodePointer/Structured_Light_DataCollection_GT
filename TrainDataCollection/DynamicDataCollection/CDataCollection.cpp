@@ -88,11 +88,11 @@ bool CDataCollection::Init()
 	this->vphase_name_ = "vPhase";
 	this->hphase_name_ = "hPhase";
 	this->phase_suffix_ = ".bmp";
-	this->dyna_name_ = "pattern_3size6color";
+	this->dyna_name_ = "pattern_3size4color";
 	this->dyna_suffix_ = ".png";
 	this->flow_name_ = "pattern_optflow";
 	this->flow_suffix_ = ".png";
-	this->wait_name_ = "pattern_3size6color";
+	this->wait_name_ = "pattern_3size4color";
 	this->wait_suffix_ = ".png";
 
 	// ´æ´¢Â·¾¶ÓëÃû³Æ
