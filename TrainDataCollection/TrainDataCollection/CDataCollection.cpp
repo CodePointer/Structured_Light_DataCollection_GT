@@ -102,7 +102,7 @@ bool CDataCollection::Init()
 	this->wait_suffix_ = ".png";
 
 	// ´æ´¢Â·¾¶ÓëÃû³Æ
-	this->save_data_path_ = "E:/Structured_Light_Data/20170919/";
+	this->save_data_path_ = "E:/Structured_Light_Data/20171008/";
 	this->dyna_frame_path_ = "dyna/";
 	this->dyna_frame_name_ = "dyna_mat";
 	this->dyna_frame_suffix_ = ".png";

@@ -88,21 +88,21 @@ bool CDataCollection::Init()
 	this->vphase_name_ = "vPhase";
 	this->hphase_name_ = "hPhase";
 	this->phase_suffix_ = ".bmp";
-	this->dyna_name_ = "pattern_3size4color";
+	this->dyna_name_ = "part_pattern_3size4color";
 	this->dyna_suffix_ = ".png";
 	this->flow_name_ = "pattern_optflow";
 	this->flow_suffix_ = ".png";
-	this->wait_name_ = "pattern_3size4color";
+	this->wait_name_ = "part_pattern_3size4color";
 	this->wait_suffix_ = ".png";
 
 	// 存储路径与名称
-	this->save_data_path_ = "E:/Structured_Light_Data/20170919/";
+	this->save_data_path_ = "E:/Structured_Light_Data/20171008/";
 	this->dyna_frame_path_ = "dyna/";
 	this->dyna_frame_name_ = "dyna_mat";
 	this->dyna_frame_suffix_ = ".png";
 	this->pro_frame_path_ = "pro/";
-	this->ipro_frame_name_ = "ipro_mat";
-	this->jpro_frame_name_ = "jpro_mat";
+	this->ipro_frame_name_ = "xpro_mat";
+	this->jpro_frame_name_ = "ypro_mat";
 	this->ipro_frame_suffix_ = ".png";
 
 	// 初始化传感器
