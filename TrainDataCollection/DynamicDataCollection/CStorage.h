@@ -26,6 +26,7 @@ public:
 	bool SetMatFileName(std::string matFilePath,	// 设定存储路径并创建
 		std::string matFileName,
 		std::string matFileSuffix);
+	bool CreateFolder(std::string FilePath);
 };
 
 #endif

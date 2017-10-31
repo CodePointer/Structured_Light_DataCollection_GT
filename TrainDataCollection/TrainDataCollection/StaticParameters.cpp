@@ -9,7 +9,7 @@ const int CAMERA_RESLINE = 1280;
 const int CAMERA_RESROW = 1024;
 
 // 计算机偏移量
-const int PC_BIASLINE = 1680;
+const int PC_BIASLINE = 1920;
 const int PC_BIASROW = 0;
 
 // 格雷码和PhaseShifting的数目

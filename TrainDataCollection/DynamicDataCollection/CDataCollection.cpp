@@ -88,15 +88,15 @@ bool CDataCollection::Init()
 	this->vphase_name_ = "vPhase";
 	this->hphase_name_ = "hPhase";
 	this->phase_suffix_ = ".bmp";
-	this->dyna_name_ = "part_pattern_3size4color";
+	this->dyna_name_ = "part_pattern_2size4color";
 	this->dyna_suffix_ = ".png";
 	this->flow_name_ = "pattern_optflow";
 	this->flow_suffix_ = ".png";
-	this->wait_name_ = "part_pattern_3size4color";
+	this->wait_name_ = "part_pattern_2size4color";
 	this->wait_suffix_ = ".png";
 
 	// 存储路径与名称
-	this->save_data_path_ = "E:/Structured_Light_Data/20171008/";
+	this->save_data_path_ = "E:/Structured_Light_Data/20171031/";
 	this->dyna_frame_path_ = "dyna/";
 	this->dyna_frame_name_ = "dyna_mat";
 	this->dyna_frame_suffix_ = ".png";
@@ -104,6 +104,12 @@ bool CDataCollection::Init()
 	this->ipro_frame_name_ = "xpro_mat";
 	this->jpro_frame_name_ = "ypro_mat";
 	this->ipro_frame_suffix_ = ".png";
+
+	// Create folder
+	CStorage storage;
+	storage.CreateFolder(this->save_data_path_);
+	storage.CreateFolder(this->save_data_path_ + "1/" + this->dyna_frame_path_);
+	storage.CreateFolder(this->save_data_path_ + "1/" + this->pro_frame_path_);
 
 	// 初始化传感器
 	if (status)

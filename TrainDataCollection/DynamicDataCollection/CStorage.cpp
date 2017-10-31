@@ -130,3 +130,19 @@ bool CStorage::SetMatFileName(string matFilePath,
 	
 	return true;
 }
+
+bool CStorage::CreateFolder(string FilePath)
+{
+	bool status = true;
+
+	// Create a dir
+	string temp = FilePath;
+	for (int i = 0; i < temp.length(); i++) {
+		if (temp[i] == '/') {
+			temp[i] = '\\';
+		}
+	}
+	system((string("mkdir ") + temp).c_str());
+
+	return status;
+}

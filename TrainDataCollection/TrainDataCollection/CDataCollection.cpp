@@ -94,15 +94,15 @@ bool CDataCollection::Init()
 	this->vphase_name_ = "vPhase";
 	this->hphase_name_ = "hPhase";
 	this->phase_suffix_ = ".bmp";
-	this->dyna_name_ = "pattern_3size6color";
+	this->dyna_name_ = "part_pattern_2size4color";
 	this->dyna_suffix_ = ".png";
 	this->flow_name_ = "pattern_optflow";
 	this->flow_suffix_ = ".png";
-	this->wait_name_ = "pattern_3size6color";
+	this->wait_name_ = "part_pattern_2size4color";
 	this->wait_suffix_ = ".png";
 
 	// 存储路径与名称
-	this->save_data_path_ = "E:/Structured_Light_Data/20171008/";
+	this->save_data_path_ = "E:/Structured_Light_Data/20171031/";
 	this->dyna_frame_path_ = "dyna/";
 	this->dyna_frame_name_ = "dyna_mat";
 	this->dyna_frame_suffix_ = ".png";
@@ -110,6 +110,12 @@ bool CDataCollection::Init()
 	this->ipro_frame_name_ = "xpro_mat";
 	this->jpro_frame_name_ = "ypro_mat";
 	this->ipro_frame_suffix_ = ".png";
+
+	// Create folder
+	CStorage storage;
+	storage.CreateFolder(this->save_data_path_);
+	storage.CreateFolder(this->save_data_path_ + "1/" + this->dyna_frame_path_);
+	storage.CreateFolder(this->save_data_path_ + "1/" + this->pro_frame_path_);
 
 	// 初始化传感器
 	if (status)
@@ -229,7 +235,7 @@ int CDataCollection::GetInputSignal(int frameNum)
 			while (true)
 			{
 				CamMat = this->sensor_manager_->GetCamPicture();
-				Mat LittleMat = CamMat(Range(502, 523), Range(630, 651));
+				Mat LittleMat = CamMat(Range(502, 523), Range(430, 451));
 				int key1 = this->my_debug_->Show(LittleMat, 100, false, 20);
 				int key2 = myCamera.Show(CamMat, 100, false, 0.5);
 				if ((key1 == 'y') || (key2 == 'y'))
@@ -755,7 +761,7 @@ bool CDataCollection::StorageData(int groupNum, int frameNum)
 	store.SetMatFileName(this->save_data_path_
 		+ folderName
 		+ "/"
-		+ this->dyna_frame_path_,
+		+ this->pro_frame_path_,
 		this->flow_name_ + frameName,
 		this->dyna_frame_suffix_);
 	store.Store(&this->flow_mats_[frameNum], 1);
@@ -770,12 +776,12 @@ bool CDataCollection::StorageData(int groupNum, int frameNum)
 	store.Store(&this->ipro_mats_[frameNum], 1);*/
 	if (frameNum >= 0)
 	{
-		store.SetMatFileName(this->save_data_path_
+		/*store.SetMatFileName(this->save_data_path_
 			+ folderName
 			+ "/"
 			+ this->pro_frame_path_,
 			this->ipro_frame_name_ + frameName,
-			this->ipro_frame_suffix_);
+			this->ipro_frame_suffix_);*/
 		FileStorage fs_i(this->save_data_path_
 			+ folderName
 			+ "/"
