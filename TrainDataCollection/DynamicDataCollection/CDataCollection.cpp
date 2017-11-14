@@ -88,7 +88,8 @@ bool CDataCollection::Init()
 	this->vphase_name_ = "vPhase";
 	this->hphase_name_ = "hPhase";
 	this->phase_suffix_ = ".bmp";
-	this->dyna_name_ = "part_pattern_2size4color";
+	// this->dyna_name_ = "part_pattern_2size4color";
+	this->dyna_name_ = "pattern_2size4color";
 	this->dyna_suffix_ = ".png";
 	this->flow_name_ = "pattern_optflow";
 	this->flow_suffix_ = ".png";
@@ -96,7 +97,7 @@ bool CDataCollection::Init()
 	this->wait_suffix_ = ".png";
 
 	// ´æ´¢Â·¾¶ÓëÃû³Æ
-	this->save_data_path_ = "E:/Structured_Light_Data/20171031/";
+	this->save_data_path_ = "E:/Structured_Light_Data/20171104/";
 	this->dyna_frame_path_ = "dyna/";
 	this->dyna_frame_name_ = "dyna_mat";
 	this->dyna_frame_suffix_ = ".png";
