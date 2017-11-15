@@ -2,7 +2,7 @@
 
 // 构造函数：
 // 设置一些基础参数。主要为private里面的静态参数
-CCamera::CCamera()
+CamManager::CamManager()
 {
 	this->sumDeviceNum = 0;
 	this->nowDeviceNum = 0;
@@ -14,7 +14,7 @@ CCamera::CCamera()
 
 // 析构函数：
 // 保证摄像机已经断开。
-CCamera::~CCamera()
+CamManager::~CamManager()
 {
 	if (this->nowDeviceNum != 0)
 		EndHVDevice(this->DeviceHandle);
@@ -32,20 +32,20 @@ CCamera::~CCamera()
 }
 
 // 获取总共摄像头数目。初始值为0。
-int CCamera::getSumDeviceNum()
+int CamManager::getSumDeviceNum()
 {
 	return this->sumDeviceNum;
 }
 
 // 获取当前采集的摄像头序号。为0，则无使用中的摄像头。
-int CCamera::getNowDeviceNum()
+int CamManager::getNowDeviceNum()
 {
 	return this->nowDeviceNum;
 }
 
 // 初始化设备以备采集。
 // 包括打开摄像机，获取相关信息并填充。
-bool CCamera::InitCamera()
+bool CamManager::InitCamera()
 {
 	HVSTATUS status;
 
@@ -95,7 +95,7 @@ bool CCamera::InitCamera()
 }
 
 // 从摄像机获取一组图像
-bool CCamera::SnapShot()
+bool CamManager::SnapShot()
 {
 	HVSTATUS status;
 	int maxAttempt = 30;
@@ -122,7 +122,7 @@ bool CCamera::SnapShot()
 }
 
 // 将图像转换为Mat格式
-bool CCamera::getPicture(cv::Mat & pic)
+bool CamManager::getPicture(cv::Mat & pic)
 {
 	// 查看缓冲区是否有剩余图片
 	if (this->used >= this->BufferNum)
@@ -139,7 +139,7 @@ bool CCamera::getPicture(cv::Mat & pic)
 }
 
 // 关闭摄像头终止采集。
-bool CCamera::CloseCamera()
+bool CamManager::CloseCamera()
 {
 	HVSTATUS status;
 

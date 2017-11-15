@@ -8,13 +8,13 @@ using namespace std;
 using namespace cv;
 
 // 可视化模块，用于debug。自动创建销毁窗口。
-class CVisualization
+class VisualModule
 {
 private:
 	string m_winName;		// 窗口名称
 public:
-	CVisualization(string winName);
-	~CVisualization();
+	VisualModule(string winName);
+	~VisualModule();
 	int Show(Mat pic, int time, bool norm = false, double zoom = 1.0);
 };
 

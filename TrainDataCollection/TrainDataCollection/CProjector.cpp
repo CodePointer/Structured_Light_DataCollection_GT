@@ -1,7 +1,7 @@
 #include "CProjector.h"
 
 // 构造函数。初始化一些变量
-CProjector::CProjector()
+ProManager::ProManager()
 {
 	this->m_resRow = PROJECTOR_RESROW;
 	this->m_resLine = PROJECTOR_RESLINE;
@@ -11,13 +11,13 @@ CProjector::CProjector()
 }
 
 // 析构函数。暂空。
-CProjector::~CProjector()
+ProManager::~ProManager()
 {
 
 }
 
 // 初始化设备。主要创建一个窗口，并将窗口置于合适位置，进行拉伸。
-bool CProjector::InitProjector()
+bool ProManager::InitProjector()
 {
 	using namespace cv;
 
@@ -33,7 +33,7 @@ bool CProjector::InitProjector()
 }
 
 // 关闭设备。销毁窗口。
-bool CProjector::CloseProjector()
+bool ProManager::CloseProjector()
 {
 	using namespace cv;
 
@@ -43,7 +43,7 @@ bool CProjector::CloseProjector()
 }
 
 // 放映。使投影仪放映出pic，并使其持续time时间。time单位为ms。
-bool CProjector::presentPicture(cv::Mat pic, int time)
+bool ProManager::presentPicture(cv::Mat pic, int time)
 {
 	using namespace cv;
 
@@ -61,7 +61,7 @@ bool CProjector::presentPicture(cv::Mat pic, int time)
 	return true;
 }
 
-bool CProjector::presentPicture(uchar x, int time)
+bool ProManager::presentPicture(uchar x, int time)
 {
 	using namespace cv;
 

@@ -24,7 +24,7 @@ int main()
 {
 	bool status = true;
 	
-	CDataCollection dc;
+	DataCollector dc;
 
 	if (status)
 	{

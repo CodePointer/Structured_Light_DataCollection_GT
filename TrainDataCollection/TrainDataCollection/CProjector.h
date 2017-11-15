@@ -11,7 +11,7 @@ using namespace cv;
 
 // 投影仪控制类。用于控制投影仪投射要求的图案。
 // 调用：InitProjector，presentPicture，CloseProjector
-class CProjector
+class ProManager
 {
 private:
 	int m_resRow;			// 投影仪的行分辨率
@@ -21,8 +21,8 @@ private:
 	string m_winName;		// 窗口名称
 
 public:
-	CProjector();			// 构造函数
-	~CProjector();			// 析构函数
+	ProManager();			// 构造函数
+	~ProManager();			// 析构函数
 	bool InitProjector();							// 初始化设备
 	bool presentPicture(Mat pic, int time);			// 使投影仪放出pic，延时time
 	bool presentPicture(uchar x, int time);			// 使投影仪放出全为x的图片，延时time

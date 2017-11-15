@@ -1,17 +1,17 @@
 #include "CVisualization.h"
 
-CVisualization::CVisualization(string winName)
+VisualModule::VisualModule(string winName)
 {
 	this->m_winName = winName;
 	namedWindow(this->m_winName);
 }
 
-CVisualization::~CVisualization()
+VisualModule::~VisualModule()
 {
 	destroyWindow(this->m_winName);
 }
 
-int CVisualization::Show(Mat pic, int time, bool norm, double zoom)
+int VisualModule::Show(Mat pic, int time, bool norm, double zoom)
 {
 	Mat show;
 	Size showSize = Size(pic.size().width*zoom, pic.size().height*zoom);

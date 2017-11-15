@@ -33,15 +33,15 @@ static std::string STORAGE_END = ".bmp";
 
 // 数据存储模块。存储中间数据做存档
 // 调用：SetMatFilePath、SetMatFileName、Store
-class CStorage
+class StorageModule
 {
 private:
 	std::string m_matFileNamePath;
 	std::string m_matFileName;
 	std::string m_matFileNameEnd;
 public:
-	CStorage();
-	~CStorage();
+	StorageModule();
+	~StorageModule();
 
 	bool Store(cv::Mat *pictures, int num);
 	bool SetMatFilePath(std::string matFileNamePath);
@@ -51,7 +51,7 @@ public:
 // 摄像头控制类。获取一帧摄像头图片，并实现对摄像头的管理（打开、关闭等等）
 // 默认是只有一个摄像头。
 // 调用：InitCamera，getPicture，CloseCamera
-class CCamera
+class CamManager
 {
 private:
 	int sumDeviceNum;			// 总共的摄像头数目
@@ -65,8 +65,8 @@ private:
 
 
 public:
-	CCamera();
-	~CCamera();
+	CamManager();
+	~CamManager();
 	int getSumDeviceNum();		// 获取总共摄像头数目
 	int getNowDeviceNum();		// 当前摄像头。
 	bool InitCamera();			// 初始化设备以备采集
@@ -77,7 +77,7 @@ public:
 
 // 投影仪控制类。用于控制投影仪投射要求的图案。
 // 调用：InitProjector，presentPicture，CloseProjector
-class CProjector
+class ProManager
 {
 private:
 	int m_resRow;			// 投影仪的行分辨率
@@ -87,8 +87,8 @@ private:
 	std::string m_winName;	// 窗口名称
 
 public:
-	CProjector();			// 构造函数
-	~CProjector();			// 析构函数
+	ProManager();			// 构造函数
+	~ProManager();			// 析构函数
 	bool InitProjector();							// 初始化设备
 	bool presentPicture(cv::Mat pic, int time);		// 使投影仪放出pic，延时time
 	bool presentPicture(uchar x, int time);			// 使投影仪放出全为x的图片，延时time
@@ -125,11 +125,11 @@ public:
 // 外部调用只需向其索要数据即可。
 // 调用：Init，Collect，Close
 // 调用：Init，GetStatFrame，GetDynaFrame，Close
-class CDataCollection
+class DataCollector
 {
 private:
-	CCamera * m_camera;
-	CProjector * m_projector;
+	CamManager * m_camera;
+	ProManager * m_projector;
 	CPattern m_vGray;
 	Mat m_CameraMat;
 	Mat m_vGrayMat[MAT_GRAYNUM_V * 2];
@@ -148,8 +148,8 @@ private:
 	bool Storage();
 
 public:
-	CDataCollection();
-	~CDataCollection();
+	DataCollector();
+	~DataCollector();
 	bool Init();
 	bool Collect();
 	bool Close();

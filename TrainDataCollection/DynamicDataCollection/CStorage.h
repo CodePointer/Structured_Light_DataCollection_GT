@@ -11,7 +11,7 @@ using namespace std;
 using namespace cv;
 
 // 数据存储模块。存储中间数据做存档
-class CStorage
+class StorageModule
 {
 private:
 	string m_matFilePath;
@@ -19,8 +19,8 @@ private:
 	string m_matFileSuffix;
 	string m_storagePath;		// 用于存储的最终路径。debug用。
 public:
-	CStorage();
-	~CStorage();
+	StorageModule();
+	~StorageModule();
 	bool Store(Mat *pictures, int num);		// 存储图片。
 
 	bool SetMatFileName(std::string matFilePath,	// 设定存储路径并创建

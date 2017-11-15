@@ -1,19 +1,19 @@
 #include "CDataCollection.h"
 
-CDataCollection::CDataCollection()
+DataCollector::DataCollector()
 {
 	this->sensor_manager_ = NULL;
 	this->vgray_mats_ = NULL;
 	this->vphase_mats_ = NULL;
 	this->dyna_mats_ = NULL;
-	this->ipro_mats_ = NULL;
-	this->my_debug_ = NULL;
+	this->xpro_mats_ = NULL;
+	this->cam_view_ = NULL;
 
 	return;
 }
 
 
-CDataCollection::~CDataCollection()
+DataCollector::~DataCollector()
 {
 	if (this->sensor_manager_ != NULL)
 	{
@@ -45,27 +45,27 @@ CDataCollection::~CDataCollection()
 		delete[]this->dyna_mats_;
 		this->dyna_mats_ = NULL;
 	}
-	if (this->ipro_mats_ != NULL)
+	if (this->xpro_mats_ != NULL)
 	{
-		delete[]this->ipro_mats_;
-		this->ipro_mats_ = NULL;
+		delete[]this->xpro_mats_;
+		this->xpro_mats_ = NULL;
 	}
-	if (this->jpro_mats_ != NULL)
+	if (this->ypro_mats_ != NULL)
 	{
-		delete[]this->jpro_mats_;
-		this->jpro_mats_ = NULL;
+		delete[]this->ypro_mats_;
+		this->ypro_mats_ = NULL;
 	}
-	if (this->my_debug_ != NULL)
+	if (this->cam_view_ != NULL)
 	{
-		delete this->my_debug_;
-		this->my_debug_ = NULL;
+		delete this->cam_view_;
+		this->cam_view_ = NULL;
 	}
 
 	return;
 }
 
 
-bool CDataCollection::Init()
+bool DataCollector::Init()
 {
 	bool status = true;
 
@@ -102,12 +102,12 @@ bool CDataCollection::Init()
 	this->dyna_frame_name_ = "dyna_mat";
 	this->dyna_frame_suffix_ = ".png";
 	this->pro_frame_path_ = "pro/";
-	this->ipro_frame_name_ = "xpro_mat";
-	this->jpro_frame_name_ = "ypro_mat";
-	this->ipro_frame_suffix_ = ".png";
+	this->xpro_frame_name_ = "xpro_mat";
+	this->ypro_frame_name_ = "ypro_mat";
+	this->pro_frame_suffix_ = ".png";
 
 	// Create folder
-	CStorage storage;
+	StorageModule storage;
 	storage.CreateFolder(this->save_data_path_);
 	storage.CreateFolder(this->save_data_path_ + "1/" + this->dyna_frame_path_);
 	storage.CreateFolder(this->save_data_path_ + "1/" + this->pro_frame_path_);
@@ -115,11 +115,11 @@ bool CDataCollection::Init()
 	// 初始化传感器
 	if (status)
 	{
-		this->sensor_manager_ = new CSensor;
+		this->sensor_manager_ = new SensorManager;
 		status = this->sensor_manager_->InitSensor();
 		if (!status)
 		{
-			ErrorHandling("CDataCollection::Init(), InitSensor failed.");
+			ErrorHandling("DataCollector::Init(), InitSensor failed.");
 		}
 	}
 
@@ -129,15 +129,15 @@ bool CDataCollection::Init()
 	this->vphase_mats_ = new Mat[PHASE_NUMDIGIT];
 	this->hphase_mats_ = new Mat[PHASE_NUMDIGIT];
 	this->dyna_mats_ = new Mat[this->max_frame_num_];
-	this->ipro_mats_ = new Mat[1];
-	this->jpro_mats_ = new Mat[1];
-	this->my_debug_ = new CVisualization("Debug");
+	this->xpro_mats_ = new Mat[1];
+	this->ypro_mats_ = new Mat[1];
+	this->cam_view_ = new VisualModule("Debug");
 
 	return status;
 }
 
 
-bool CDataCollection::CollectData()
+bool DataCollector::CollectData()
 {
 	bool status = true;
 
@@ -170,7 +170,7 @@ bool CDataCollection::CollectData()
 		}
 		// Collect frame 0 datas
 		if (status) {
-			status = this->CollectSingleFrame(0);
+			status = this->CollectStaticFrame(0);
 		}
 		if (status) {
 			status = this->DecodeSingleFrame(0);
@@ -201,7 +201,7 @@ bool CDataCollection::CollectData()
 }
 
 
-int CDataCollection::GetInputSignal(int frameNum)
+int DataCollector::GetInputSignal(int frameNum)
 {
 	// return:
 	//     0: Continue
@@ -214,7 +214,7 @@ int CDataCollection::GetInputSignal(int frameNum)
 	// 等待采集命令
 	if ((frameNum == 0) || (this->flag_ground_truth_))
 	{
-		CVisualization myCamera("DebugCamera");
+		VisualModule myCamera("DebugCamera");
 		bool status = true;
 		if (status)
 		{
@@ -235,7 +235,7 @@ int CDataCollection::GetInputSignal(int frameNum)
 			{
 				CamMat = this->sensor_manager_->GetCamPicture();
 				Mat LittleMat = CamMat(Range(502, 523), Range(630, 651));
-				int key1 = this->my_debug_->Show(LittleMat, 100, false, 20);
+				int key1 = this->cam_view_->Show(LittleMat, 100, false, 20);
 				int key2 = myCamera.Show(CamMat, 100, false, 0.5);
 				if ((key1 == 'y') || (key2 == 'y'))
 				{
@@ -261,7 +261,7 @@ int CDataCollection::GetInputSignal(int frameNum)
 }
 
 
-bool CDataCollection::CollectSingleFrame(int frameNum)
+bool DataCollector::CollectStaticFrame(int frameNum)
 {
 	bool status = true;
 
@@ -393,7 +393,7 @@ bool CDataCollection::CollectSingleFrame(int frameNum)
 }
 
 
-bool CDataCollection::CollectDynamicFrame()
+bool DataCollector::CollectDynamicFrame()
 {
 	// ---------------------------------
 	// Use for collect data continually
@@ -428,12 +428,12 @@ bool CDataCollection::CollectDynamicFrame()
 }
 
 
-bool CDataCollection::DecodeSingleFrame(int frameNum)
+bool DataCollector::DecodeSingleFrame(int frameNum)
 {
 	bool status = true;
 
 	// vgray
-	CDecodeGray vgray_decoder;
+	GrayDecoder vgray_decoder;
 	Mat tmp_gray_mat;
 	if (status) {
 		status = vgray_decoder.SetNumDigit(GRAY_V_NUMDIGIT, true);
@@ -453,11 +453,11 @@ bool CDataCollection::DecodeSingleFrame(int frameNum)
 	}
 
 	// vphase解码
-	CDecodePhase vphase_decoder;
+	PhaseDecoder vphase_decoder;
 	Mat tmp_phase_mat;
 	int v_pixPeriod = PROJECTOR_RESLINE / (1 << GRAY_V_NUMDIGIT - 1);
 	if (status) {
-		status = vphase_decoder.SetNumMat(PHASE_NUMDIGIT, v_pixPeriod);
+		status = vphase_decoder.SetNumDigit(PHASE_NUMDIGIT, v_pixPeriod);
 	}
 	for (int i = 0; (i < PHASE_NUMDIGIT) && status; i++) {
 		status = vphase_decoder.SetMat(i, this->vphase_mats_[i]);
@@ -499,11 +499,11 @@ bool CDataCollection::DecodeSingleFrame(int frameNum)
 		}
 		/*this->my_debug_->Show(tmp_gray_mat, 0, true, 0.5);
 		this->my_debug_->Show(tmp_phase_mat, 0, true, 0.5);*/
-		this->ipro_mats_[frameNum] = tmp_gray_mat + tmp_phase_mat;
+		this->xpro_mats_[frameNum] = tmp_gray_mat + tmp_phase_mat;
 	}
 
 	// hgray
-	CDecodeGray hgray_decoder;
+	GrayDecoder hgray_decoder;
 	if (status) {
 		status = hgray_decoder.SetNumDigit(GRAY_H_NUMDIGIT, false);
 	}
@@ -522,10 +522,10 @@ bool CDataCollection::DecodeSingleFrame(int frameNum)
 	}
 
 	// hphase解码
-	CDecodePhase hphase_decoder;
+	PhaseDecoder hphase_decoder;
 	int h_pixPeriod = PROJECTOR_RESROW / (1 << GRAY_H_NUMDIGIT - 1);
 	if (status) {
-		status = hphase_decoder.SetNumMat(PHASE_NUMDIGIT, h_pixPeriod);
+		status = hphase_decoder.SetNumDigit(PHASE_NUMDIGIT, h_pixPeriod);
 	}
 	for (int i = 0; i < PHASE_NUMDIGIT; i++) {
 		status = hphase_decoder.SetMat(i, this->hphase_mats_[i]);
@@ -574,7 +574,7 @@ bool CDataCollection::DecodeSingleFrame(int frameNum)
 		}
 		/*this->my_debug_->Show(tmp_gray_mat, 0, true, 0.5);
 		this->my_debug_->Show(tmp_phase_mat, 0, true, 0.5);*/
-		this->jpro_mats_[frameNum] = tmp_gray_mat + tmp_phase_mat;
+		this->ypro_mats_[frameNum] = tmp_gray_mat + tmp_phase_mat;
 		//this->my_debug_->Show(this->jpro_mats_[frameNum], 0, true, 0.5);
 	}
 
@@ -582,12 +582,12 @@ bool CDataCollection::DecodeSingleFrame(int frameNum)
 }
 
 
-bool CDataCollection::VisualizationForDynamicScene(int total_frame_num)
+bool DataCollector::VisualizationForDynamicScene(int total_frame_num)
 {
 	int key;
 	bool status = true;
 	while (true) {
-		key = this->my_debug_->Show(this->ipro_mats_[0], 500, true, 0.5);
+		key = this->cam_view_->Show(this->xpro_mats_[0], 500, true, 0.5);
 		if (key == 'y')	{
 			status = true;
 			break;
@@ -596,7 +596,7 @@ bool CDataCollection::VisualizationForDynamicScene(int total_frame_num)
 			status = false;
 			break;
 		}
-		key = this->my_debug_->Show(this->jpro_mats_[0], 500, true, 0.5);
+		key = this->cam_view_->Show(this->ypro_mats_[0], 500, true, 0.5);
 		if (key == 'y') {
 			status = true;
 			break;
@@ -606,7 +606,7 @@ bool CDataCollection::VisualizationForDynamicScene(int total_frame_num)
 			break;
 		}
 		for (int frame_idx = 0; frame_idx < total_frame_num; frame_idx++) {
-			key = this->my_debug_->Show(this->dyna_mats_[frame_idx], 100, false, 0.5);
+			key = this->cam_view_->Show(this->dyna_mats_[frame_idx], 100, false, 0.5);
 			if (key == 'y') {
 				status = true;
 				break;
@@ -622,7 +622,7 @@ bool CDataCollection::VisualizationForDynamicScene(int total_frame_num)
 }
 
 
-bool CDataCollection::Close()
+bool DataCollector::Close()
 {
 	bool status = true;
 
@@ -635,12 +635,12 @@ bool CDataCollection::Close()
 }
 
 
-bool CDataCollection::StorageData(int groupNum)
+bool DataCollector::StorageData(int groupNum)
 {
 	if (!this->storage_flag_)
 		return true;
 
-	CStorage store;
+	StorageModule store;
 
 	// Set Folder
 	stringstream ss;
@@ -671,25 +671,25 @@ bool CDataCollection::StorageData(int groupNum)
 		+ folderName
 		+ "/"
 		+ this->pro_frame_path_,
-		this->ipro_frame_name_,
-		this->ipro_frame_suffix_);
+		this->xpro_frame_name_,
+		this->pro_frame_suffix_);
 	FileStorage fs_i(this->save_data_path_
 		+ folderName
 		+ "/"
 		+ this->pro_frame_path_
-		+ this->ipro_frame_name_
+		+ this->xpro_frame_name_
 		+ "0"
 		+ ".xml", FileStorage::WRITE);
-	fs_i << "xpro_mat" << this->ipro_mats_[0];
+	fs_i << "xpro_mat" << this->xpro_mats_[0];
 	fs_i.release();
 	FileStorage fs_j(this->save_data_path_
 		+ folderName
 		+ "/"
 		+ this->pro_frame_path_
-		+ this->jpro_frame_name_
+		+ this->ypro_frame_name_
 		+ "0"
 		+ ".xml", FileStorage::WRITE);
-	fs_j << "ypro_mat" << this->jpro_mats_[0];
+	fs_j << "ypro_mat" << this->ypro_mats_[0];
 	fs_j.release();
 
 	return true;

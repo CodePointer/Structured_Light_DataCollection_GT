@@ -5,7 +5,7 @@
 // 用于模拟传感器传入数据。
 // 由于标定内容之前已经离线采集好，因此这个类只需要从文件中读入文件即可。
 
-CSensor::CSensor()
+SensorManager::SensorManager()
 {
 	this->m_patterns = NULL;
 	this->m_patternNum = 0;
@@ -18,7 +18,7 @@ CSensor::CSensor()
 	this->m_projector = NULL;
 }
 
-CSensor::~CSensor()
+SensorManager::~SensorManager()
 {
 	if (this->m_patterns != NULL)
 	{
@@ -39,21 +39,21 @@ CSensor::~CSensor()
 
 // 初始化传感器
 // 创建Camera、Projector并进行初始化
-bool CSensor::InitSensor()
+bool SensorManager::InitSensor()
 {
 	bool status;
 
-	this->m_camera = new CCamera();
+	this->m_camera = new CamManager();
 	status = this->m_camera->InitCamera();
 
-	this->m_projector = new CProjector();
+	this->m_projector = new ProManager();
 	status = this->m_projector->InitProjector();
 
 	return status;
 }
 
 // 关闭传感器
-bool CSensor::CloseSensor()
+bool SensorManager::CloseSensor()
 {
 	bool status = true;
 
@@ -74,7 +74,7 @@ bool CSensor::CloseSensor()
 }
 
 // 读取图案
-bool CSensor::LoadPatterns(int patternNum, string filePath, string fileName, string fileSuffix)
+bool SensorManager::LoadPatterns(int patternNum, string filePath, string fileName, string fileSuffix)
 {
 	// 检查状态是否合法
 	if (this->m_patterns != NULL)
@@ -110,7 +110,7 @@ bool CSensor::LoadPatterns(int patternNum, string filePath, string fileName, str
 				+ this->m_fileName
 				+ idx2Str
 				+ this->m_fileSuffix;
-			ErrorHandling("CSensor::LoadPatterns::<Read>, imread error, idx=" + idx2Str + " file_path:" + file_name);
+			ErrorHandling("SensorManager::LoadPatterns::<Read>, imread error, idx=" + idx2Str + " file_path:" + file_name);
 		}
 	}
 
@@ -118,7 +118,7 @@ bool CSensor::LoadPatterns(int patternNum, string filePath, string fileName, str
 }
 
 // 释放已读取图案
-bool CSensor::UnloadPatterns()
+bool SensorManager::UnloadPatterns()
 {
 	if (this->m_patterns != NULL)
 	{
@@ -135,7 +135,7 @@ bool CSensor::UnloadPatterns()
 }
 
 // 设置投影仪投影的图像，从0计数
-bool CSensor::SetProPicture(int nowNum)
+bool SensorManager::SetProPicture(int nowNum)
 {
 	bool status = true;
 
@@ -155,7 +155,7 @@ bool CSensor::SetProPicture(int nowNum)
 }
 
 // 获取相机图像
-Mat CSensor::GetCamPicture()
+Mat SensorManager::GetCamPicture()
 {
 	bool status = true;
 
@@ -166,7 +166,7 @@ Mat CSensor::GetCamPicture()
 }
 
 // 获取投影仪投影的图像
-Mat CSensor::GetProPicture()
+Mat SensorManager::GetProPicture()
 {
 	return this->m_patterns[this->m_nowNum];
 }

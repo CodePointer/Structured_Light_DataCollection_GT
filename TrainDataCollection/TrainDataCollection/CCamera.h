@@ -16,7 +16,7 @@ using namespace cv;
 // 摄像头控制类。获取一帧摄像头图片，并实现对摄像头的管理（打开、关闭等等）
 // 默认是只有一个摄像头。
 // 调用：InitCamera，getPicture，CloseCamera
-class CCamera
+class CamManager
 {
 private:
 	int sumDeviceNum;			// 总共的摄像头数目
@@ -30,8 +30,8 @@ private:
 
 
 public:
-	CCamera();
-	~CCamera();
+	CamManager();
+	~CamManager();
 	int getSumDeviceNum();		// 获取总共摄像头数目
 	int getNowDeviceNum();		// 当前摄像头。
 	bool InitCamera();			// 初始化设备以备采集

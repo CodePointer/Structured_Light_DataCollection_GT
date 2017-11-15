@@ -1,6 +1,6 @@
 #include "CStorage.h"
 
-CStorage::CStorage()
+StorageModule::StorageModule()
 {
 	this->m_matFilePath = "";
 	this->m_matFileName = "";
@@ -8,12 +8,12 @@ CStorage::CStorage()
 	this->m_storagePath = "";
 }
 
-CStorage::~CStorage()
+StorageModule::~StorageModule()
 {
 
 }
 
-bool CStorage::Store(Mat * pictures, int num)
+bool StorageModule::Store(Mat * pictures, int num)
 {
 
 	// 判断参数是否合法
@@ -97,14 +97,14 @@ bool CStorage::Store(Mat * pictures, int num)
 
 	if (!status)
 	{
-		ErrorHandling("CStorage.Store->imwrite Error.");
+		ErrorHandling("StorageModule.Store->imwrite Error.");
 	}
 
 	return true;
 }
 
 // 设定存储目录
-bool CStorage::SetMatFileName(string matFilePath,
+bool StorageModule::SetMatFileName(string matFilePath,
 	string matFileName,
 	string matFileSuffix)
 {
@@ -129,7 +129,7 @@ bool CStorage::SetMatFileName(string matFilePath,
 	return true;
 }
 
-bool CStorage::CreateFolder(string FilePath)
+bool StorageModule::CreateFolder(string FilePath)
 {
 	bool status = true;
 

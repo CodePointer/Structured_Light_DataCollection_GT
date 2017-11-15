@@ -14,7 +14,7 @@ using namespace std;
 using namespace cv;
 
 // 传感器模块。
-class CSensor
+class SensorManager
 {
 private:
 	// 待投影图案存储：
@@ -26,12 +26,12 @@ private:
 	Mat * m_patterns;
 
 	// 设备管理
-	CCamera * m_camera;
-	CProjector * m_projector;
+	CamManager * m_camera;
+	ProManager * m_projector;
 
 public:
-	CSensor();
-	~CSensor();
+	SensorManager();
+	~SensorManager();
 
 	// 初始化传感器
 	bool InitSensor();

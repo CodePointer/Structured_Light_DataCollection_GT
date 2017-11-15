@@ -13,10 +13,10 @@
 // 数据采集类。控制整体的数据采集，屏蔽下层的内容
 // 外部调用只需向其索要数据即可。
 // 调用：Init，Collect，Close
-class CDataCollection
+class DataCollector
 {
 private:
-	CSensor * sensor_manager_;
+	SensorManager * sensor_manager_;
 
 	bool flag_ground_truth_;
 
@@ -27,8 +27,8 @@ private:
 	Mat * hphase_mats_;
 	Mat * dyna_mats_;
 	Mat flow_mat_;
-	Mat * ipro_mats_;
-	Mat * jpro_mats_;
+	Mat * xpro_mats_;
+	Mat * ypro_mats_;
 
 	// 图案路径与名称
 	string pattern_path_;
@@ -54,12 +54,12 @@ private:
 	string dyna_frame_name_;
 	string dyna_frame_suffix_;
 	string pro_frame_path_;
-	string ipro_frame_name_;
-	string jpro_frame_name_;
-	string ipro_frame_suffix_;
+	string xpro_frame_name_;
+	string ypro_frame_name_;
+	string pro_frame_suffix_;
 
 	// visualization
-	CVisualization * my_debug_;
+	VisualModule * cam_view_;
 
 	// 类内参数
 	bool visualize_flag_;
@@ -68,14 +68,14 @@ private:
 
 	bool StorageData(int groupNum);
 	int GetInputSignal(int frameNum);
-	bool CollectSingleFrame(int frameNum);
+	bool CollectStaticFrame(int frameNum);
 	bool CollectDynamicFrame();
 	bool DecodeSingleFrame(int frameNum);
 	bool VisualizationForDynamicScene(int total_frame_num);
 
 public:
-	CDataCollection();
-	~CDataCollection();
+	DataCollector();
+	~DataCollector();
 	bool Init();
 	bool CollectData();
 	bool Close();
