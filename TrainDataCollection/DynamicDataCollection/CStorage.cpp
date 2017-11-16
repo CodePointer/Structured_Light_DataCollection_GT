@@ -13,7 +13,7 @@ StorageModule::~StorageModule()
 
 }
 
-bool StorageModule::Store(Mat * pictures, int num)
+bool StorageModule::StoreAsImage(Mat * pictures, int num)
 {
 
 	// 判断参数是否合法
@@ -97,7 +97,7 @@ bool StorageModule::Store(Mat * pictures, int num)
 
 	if (!status)
 	{
-		ErrorHandling("StorageModule.Store->imwrite Error.");
+		ErrorHandling("StorageModule.StoreAsImage->imwrite Error.");
 	}
 
 	return true;

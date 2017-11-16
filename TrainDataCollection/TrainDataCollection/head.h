@@ -43,7 +43,7 @@ public:
 	StorageModule();
 	~StorageModule();
 
-	bool Store(cv::Mat *pictures, int num);
+	bool StoreAsImage(cv::Mat *pictures, int num);
 	bool SetMatFilePath(std::string matFileNamePath);
 	bool SetMatFileName(std::string matFileName, std::string matFileNameEnd);
 };

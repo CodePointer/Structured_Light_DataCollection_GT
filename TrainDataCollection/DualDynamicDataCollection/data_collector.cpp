@@ -507,41 +507,36 @@ bool DataCollector::DecodeSingleFrame(int frameNum) {
 	return status;
 }
 
-bool DataCollector::VisualizationForDynamicScene(int total_frame_num)
-{//TODO
+bool DataCollector::VisualizationForDynamicScene(int total_frame_num) {
 	int key;
 	bool status = true;
-	while (true) {
-		key = this->cam_view_->Show(this->xpro_mats_[0], 500, true, 0.5);
-		if (key == 'y')	{
-			status = true;
-			break;
-		}
-		else if (key == 'n') {
-			status = false;
-			break;
-		}
-		key = this->cam_view_->Show(this->ypro_mats_[0], 500, true, 0.5);
-		if (key == 'y') {
-			status = true;
-			break;
-		}
-		else if (key == 'n') {
-			status = false;
-			break;
-		}
-		for (int frame_idx = 0; frame_idx < total_frame_num; frame_idx++) {
-			key = this->cam_view_->Show(this->dyna_mats_[frame_idx], 100, false, 0.5);
-			if (key == 'y') {
-				status = true;
-				break;
-			}
-			else if (key == 'n') {
-				status = false;
-				break;
-			}
-		}
-	}
+  while (true) {
+    for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
+      key = this->cam_view_->Show(this->cam_mats_[cam_idx].x_pro[0],
+                                  500, true, 0.5);
+      if (key == 'y' || key == 'n')
+        break;
+      key = this->cam_view_->Show(this->cam_mats_[cam_idx].y_pro[0],
+                                  500, true, 0.5);
+      if (key == 'y' || key == 'n')
+        break;
+      for (int frm_idx = 0; frm_idx < total_frame_num; frm_idx++) {
+        key = this->cam_view_->Show(this->cam_mats_[cam_idx].dyna[frm_idx],
+                                    100, false, 0.5);
+        if (key == 'y' || key == 'n')
+          break;
+      }
+      if (key == 'y' || key == 'n')
+        break;
+    }
+    if (key == 'y' || key == 'n')
+      break;
+  }
+  if (key == 'y') {
+    status = true;
+  } else if (key == 'n') {
+    status = false;
+  }
 
 	return status;
 }
@@ -554,54 +549,43 @@ bool DataCollector::Close() {
 	return status;
 }
 
-bool DataCollector::StorageData(int groupNum) {//TODO
+bool DataCollector::StorageData(int groupNum) {
 	if (!this->storage_flag_)
 		return true;
-
-	StorageModule store;
-
 	// Set Folder
 	stringstream ss;
-	ss << groupNum;
-	string folderName;
-	ss >> folderName;
+	ss << groupNum << "/";
+	string group_folder_path;
+	ss >> group_folder_path;
+  StorageModule store;
 
-	// Save dyna mats
-	store.SetMatFileName(this->save_data_path_
-		+ folderName
-		+ "/"
-		+ this->dyna_frame_path_,
-		this->dyna_frame_name_,
-		this->dyna_frame_suffix_);
-	store.Store(this->dyna_mats_, this->max_frame_num_);
+  for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
+    // CamFolderInfo
+    stringstream ss_cam;
+    ss_cam << "cam_" << cam_idx << "/";
+    string cam_folder_path;
+    ss_cam >> cam_folder_path;
 
-	// Save xpro & ypro
-	store.SetMatFileName(this->save_data_path_
-		+ folderName
-		+ "/"
-		+ this->pro_frame_path_,
-		this->xpro_frame_name_,
-		this->pro_frame_suffix_);
-	FileStorage fs_i(this->save_data_path_
-		+ folderName
-		+ "/"
-		+ this->pro_frame_path_
-		+ this->xpro_frame_name_
-		+ "0"
-		+ ".xml", FileStorage::WRITE);
-	fs_i << "xpro_mat" << this->xpro_mats_[0];
-	fs_i.release();
-	FileStorage fs_j(this->save_data_path_
-		+ folderName
-		+ "/"
-		+ this->pro_frame_path_
-		+ this->ypro_frame_name_
-		+ "0"
-		+ ".xml", FileStorage::WRITE);
-	fs_j << "ypro_mat" << this->ypro_mats_[0];
-	fs_j.release();
-
+    // Save dyna mats
+    store.SetMatFileName(
+        this->save_data_path_ + group_folder_path + cam_folder_path
+        + this->dyna_frame_path_, this->dyna_frame_name_, 
+        this->dyna_frame_suffix_);
+    store.StoreAsImage(this->cam_mats_[cam_idx].dyna, this->max_frame_num_);
+    // Save x_pro
+    store.SetMatFileName(
+        this->save_data_path_ + group_folder_path + cam_folder_path
+        + this->pro_frame_path_, this->xpro_frame_name_, 
+        this->pro_frame_suffix_);
+    store.StoreAsXml(this->cam_mats_[cam_idx].x_pro, 1);
+    store.StoreAsText(this->cam_mats_[cam_idx].x_pro, 1);
+    // Save y_pro
+    store.SetMatFileName(
+        this->save_data_path_ + group_folder_path + cam_folder_path
+        + this->pro_frame_path_, this->ypro_frame_name_,
+        this->pro_frame_suffix_);
+    store.StoreAsXml(this->cam_mats_[cam_idx].y_pro, 1);
+    store.StoreAsText(this->cam_mats_[cam_idx].y_pro, 1);
+  }
 	return true;
 }
-
-

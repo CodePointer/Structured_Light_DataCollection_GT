@@ -655,7 +655,7 @@ bool DataCollector::StorageData(int groupNum)
 		+ this->dyna_frame_path_,
 		this->dyna_frame_name_,
 		this->dyna_frame_suffix_);
-	store.Store(this->dyna_mats_, this->max_frame_num_);
+	store.StoreAsImage(this->dyna_mats_, this->max_frame_num_);
 
 	// Save flow_mat
 	store.SetMatFileName(this->save_data_path_
@@ -664,7 +664,7 @@ bool DataCollector::StorageData(int groupNum)
 		+ this->pro_frame_path_,
 		this->flow_name_,
 		this->dyna_frame_suffix_);
-	store.Store(&this->flow_mat_, 1);
+	store.StoreAsImage(&this->flow_mat_, 1);
 
 	// Save ipro & jpro
 	store.SetMatFileName(this->save_data_path_

@@ -20,7 +20,7 @@ private:
 public:
 	StorageModule();
 	~StorageModule();
-	bool Store(Mat *pictures, int num);		// ´æ´¢Í¼Æ¬¡£
+	bool StoreAsImage(Mat *pictures, int num);		// ´æ´¢Í¼Æ¬¡£
 
 	bool SetMatFileName(std::string matFilePath,	// Éè¶¨´æ´¢Â·¾¶²¢´´½¨
 		std::string matFileName,

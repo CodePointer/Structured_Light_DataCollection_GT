@@ -756,7 +756,7 @@ bool DataCollector::StorageData(int groupNum, int frameNum)
 		+ this->dyna_frame_path_,
 		this->dyna_name_ + frameName,
 		this->dyna_frame_suffix_);
-	store.Store(&this->dyna_mats_[frameNum], 1);
+	store.StoreAsImage(&this->dyna_mats_[frameNum], 1);
 
 	// save flow_mat
 	store.SetMatFileName(this->save_data_path_
@@ -765,7 +765,7 @@ bool DataCollector::StorageData(int groupNum, int frameNum)
 		+ this->pro_frame_path_,
 		this->flow_name_ + frameName,
 		this->dyna_frame_suffix_);
-	store.Store(&this->flow_mats_[frameNum], 1);
+	store.StoreAsImage(&this->flow_mats_[frameNum], 1);
 	
 	// 保存对应的真值信息
 	/*store.SetMatFileName(this->save_data_path_
