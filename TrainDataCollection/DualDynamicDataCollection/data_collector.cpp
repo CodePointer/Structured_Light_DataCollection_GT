@@ -70,8 +70,8 @@ bool DataCollector::Init() {
 	// Create folder for storage
 	StorageModule storage;
 	storage.CreateFolder(this->save_data_path_);
-	storage.CreateFolder(this->save_data_path_ + "1/" + this->dyna_frame_path_);
-	storage.CreateFolder(this->save_data_path_ + "1/" + this->pro_frame_path_);
+	//storage.CreateFolder(this->save_data_path_ + "1/" + this->dyna_frame_path_);
+	//storage.CreateFolder(this->save_data_path_ + "1/" + this->pro_frame_path_);
 
 	// Initialize sensor manager
 	if (status)	{
