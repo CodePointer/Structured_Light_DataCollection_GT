@@ -63,3 +63,15 @@ int VisualModule::Show(Mat pic, int time, bool norm, double zoom) {
 	imshow(this->win_name_, show_mat);
 	return waitKey(time);
 }
+
+int VisualModule::CombineShow(Mat * pics, int num, int time, double zoom) {
+  Mat combine_mat, show_mat;
+  Size combine_size = Size(pic.size().width * num, pic.size().height);
+  Size show_size = Size(pic.size().width*zoom*2, pic.size().height*zoom);
+  // Combine part
+  //
+  // Combine part
+  resize(combine_mat, show_mat, show_size, 0.0, 0.0, INTER_NEAREST);
+  imshow(this->win_name_, show_mat);
+  return waitKey(time);
+}

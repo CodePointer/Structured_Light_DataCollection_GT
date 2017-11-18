@@ -22,9 +22,10 @@ const int kShowPictureTime = 500;
 const bool kVisualFlagForDebug = false;
 
 //// 棋盘格相关参数
-//const bool CHESS_FRAME_NUMBER = 15;
-//const int CHESS_LINE = 9;
-//const int CHESS_ROW = 6;
+const bool kChessFrameNumber = 15;
+const int kChessWidth = 9;
+const int kChessHeight = 6;
+const int kStereoSize = kCamDeviceNum + kCamDeviceNum*(kCamDeviceNum - 1) / 2;
 
 // 数据采集相关参数
 

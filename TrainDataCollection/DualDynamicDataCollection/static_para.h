@@ -27,10 +27,17 @@ extern const int kPhaseNum;
 extern const int kShowPictureTime;
 extern const bool kVisualFlagForDebug;
 
-//// Chess board parameters
-//extern const bool CHESS_FRAME_NUMBER;
-//extern const int CHESS_LINE;
-//extern const int CHESS_ROW;
+// Chess board parameters
+extern const bool kChessFrameNumber;
+extern const int kChessWidth;
+extern const int kChessHeight;
+extern const int kStereoSize;
+struct StereoCalibSet {
+  Mat R;
+  Mat T;
+  Mat E;
+  Mat F;
+};
 
 // data pathes
 extern const string kProPatternPath;
