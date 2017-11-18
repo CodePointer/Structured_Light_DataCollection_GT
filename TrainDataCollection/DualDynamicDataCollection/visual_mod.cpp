@@ -66,11 +66,16 @@ int VisualModule::Show(Mat pic, int time, bool norm, double zoom) {
 
 int VisualModule::CombineShow(Mat * pics, int num, int time, double zoom) {
   Mat combine_mat, show_mat;
-  Size combine_size = Size(pic.size().width * num, pic.size().height);
-  Size show_size = Size(pic.size().width*zoom*2, pic.size().height*zoom);
-  // Combine part
-  //
-  // Combine part
+  //Size combine_size = Size(pic.size().width * num, pic.size().height);
+  Size show_size = Size(pic.size().width*zoom*num, pic.size().height*zoom);
+  // Combine part: hconcat(B,C,A);
+  Mat mat_B = pics[0];
+  Mat mat_C;
+  for (int i = 1; i < num; i++) {
+	  mat_C = pics[1];
+	  combine_mat = hconcat(mat_B, mat_C, combine_mat);
+	  mat_B = combine_mat;
+  }
   resize(combine_mat, show_mat, show_size, 0.0, 0.0, INTER_NEAREST);
   imshow(this->win_name_, show_mat);
   return waitKey(time);

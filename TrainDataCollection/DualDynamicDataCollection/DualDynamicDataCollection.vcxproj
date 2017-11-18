@@ -114,6 +114,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="calibrator.cpp" />
     <ClCompile Include="cam_manager.cpp" />
     <ClCompile Include="data_collector.cpp" />
     <ClCompile Include="gray_decoder.cpp" />
@@ -127,6 +128,7 @@
     <ClCompile Include="static_para.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="calibrator.h" />
     <ClInclude Include="cam_manager.h" />
     <ClInclude Include="data_collector.h" />
     <ClInclude Include="gray_decoder.h" />

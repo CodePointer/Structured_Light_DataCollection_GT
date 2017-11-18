@@ -120,20 +120,14 @@ bool Calibrator::Calibrate() {
 
     // Fill ProPoint；
     status = this->RecoChessPointPro(frm_idx);
-    printf("For %dth picture: ProPoint finished.\n", frm_idx + 1);
-
     // Make sure the recognition result is correct
     // save the corner information and correspondence information
-    int key = 0;
-    key = cam_visual.Show(this->m_chessMatDraw, 100, false, 0.5);
-    key = myProjector.Show(this->m_proMatDraw, 0, false, 0.5);
-    if (key == 'y') {
-      status = this->PushChessPoint(frm_idx);
-      printf("Finish %dth picture.\n", frm_idx + 1);
+    if (status) {
+      printf("For %dth picture: ProPoint finished.\n", frm_idx + 1);
+      this->PushChessPoint(frm_idx);
     } else {
-      printf("Invalid %dth picture. Data discarded.\n", frm_idx + 1);
+      printf("Invalid pro_point. Discard.\n");
       frm_idx = frm_idx - 1;
-      continue;
     }
   }
 
@@ -205,27 +199,53 @@ bool Calibrator::Calibrate() {
   return true;
 }
 
-// 输出保存数据 TODO
-bool Calibrator::Result()
-{
-  FileStorage fs("CalibrationResult.xml", FileStorage::WRITE);
-  cout << "CamMat" << endl;
-  fs << "CamMat" << this->m_camMatrix;
-  cout << this->m_camMatrix << endl;
-
-  cout << "ProMat" << endl;
-  fs << "ProMat" << this->m_proMatrix;
-  cout << this->m_proMatrix << endl;
-
-  cout << "R,T" << endl;
-  fs << "R" << this->m_R;
-  fs << "T" << this->m_T;
-  cout << this->m_R << endl;
-  cout << this->m_T << endl;
-  fs.release();
-
-  cout << "Calibration Finished. Data was stored at <CalibrationResult.xml>." << endl;
-
+// 输出保存数据
+bool Calibrator::Result() {
+  // Output individuals
+  for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
+    stringstream ss;
+    ss << cam_idx;
+    string idx2str;
+    ss >> idx2str;
+    FileStorage fs_cam("cam" + idx2str + ".xml", FileStorage::WRITE);
+    fs_cam << "cam_matrix" << this->cam_matrix_[cam_idx];
+    fs_cam << "cam_distor" << this->cam_distor_[cam_idx];
+    fs_cam.release();
+  }
+  FileStorage fs_pro("pro.xml", FileStorage::WRITE);
+  fs_pro << "pro_matrix" << this->pro_matrix_;
+  fs_pro << "pro_distor" << this->pro_distor_;
+  fs_pro.release();
+  // Stereo parameters
+  for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
+    stringstream ss;
+    ss << cam_idx;
+    string idx2str;
+    ss >> idx2str;
+    FileStorage fs_cam_pro("cam" + idx2str + "_pro.xml", FileStorage::WRITE);
+    fs_cam_pro << "rot" << this->stereo_set_[cam_idx].R;
+    fs_cam_pro << "trans" << this->stereo_set_[cam_idx].T;
+    fs_cam_pro.release();
+  }
+  int ste_idx = kCamDeviceNum;
+  for (int c_1 = 0; c_1 < kCamDeviceNum; c_1++) {
+    stringstream ss_1;
+    ss_1 << c_1;
+    string idx2str_1;
+    ss_1 >> idx2str_1;
+    for (int c_2 = 1; c_2 < kCamDeviceNum; c_2++) {
+      stringstream ss_2;
+      ss_2 << c_2;
+      string idx2str_2;
+      ss_2 >> idx2str_2;
+      FileStorage fs_cam_cam("cam" + idx2str_1 + "_cam" + idx2str_2 + ".xml",
+                             FileStorage::WRITE);
+      fs_cam_cam << "rot" << this->stereo_set_[ste_idx];
+      fs_cam_cam << "trans" << this->stereo_set_[ste_idx];
+      fs_cam_cam.release();
+    }
+  }
+  printf("Calibration Finished.\n");
   return true;
 }
 
@@ -279,9 +299,13 @@ bool Calibrator::RecoChessPointCam(int frameIdx) {
         cornerSubPix(
             cam_tmp[cam_idx], this->tmp_cam_points_[cam_idx], Size(5,5), Size(-1,-1), 
             TermCriteria(TermCriteria::MAX_ITER + TermCriteria::EPS, 30, 0.1));
+        drawChessboardCorners(
+            cam_tmp[cam_idx], Size(kChessHeight, kChessWidth),
+            this->tmp_cam_points_[cam_idx], found);
       }
     }
     if (reco_flag) {
+      cam_visual.CombineShow(cam_tmp, 2, 100, 0.5);
       break;
     }
   }
@@ -465,7 +489,12 @@ bool Calibrator::RecoChessPointPro(int frameIdx) {
   draw_mat.setTo(0);
   drawChessboardCorners(
       draw_mat, Size(kChessHeight, kChessWidth), this->tmp_pro_points_, true);
-  myProjector.Show(draw_mat, 500, false, 0.5);
+  int key = myProjector.Show(draw_mat, 0, false, 0.5);
+  if (key == 'y') {
+    status = true;
+  } else {
+    status = false;
+  }
 
   return status;
 }
@@ -478,39 +507,5 @@ bool Calibrator::PushChessPoint(int frameIdx) {
   }
   this->obj_points_.push_back(this->tmp_obj_points_);
   this->pro_points_.push_back(this->tmp_pro_points_);
-
-  //// 存储本地图像
-  //strstream ss;
-  //string IdxtoStr;
-  //ss << frameIdx + 1;
-  //ss >> IdxtoStr;
-
-  //// 相机图像
-  //CStorage camChessMat;
-  //camChessMat.SetMatFileName("RecoChessPoint/", "cam_mat" + IdxtoStr, ".png");
-  //camChessMat.Store(&(this->m_chessMat), 1);
-  //camChessMat.SetMatFileName("RecoChessPoint/", "corner_res" + IdxtoStr, ".png");
-  //camChessMat.Store(&(this->m_chessMatDraw), 1);
-
-  //// 投影仪坐标
-  //FileStorage fs;
-  //fs.open("RecoChessPoint/xpro_mat" + IdxtoStr + ".xml", FileStorage::WRITE);
-  //fs << "xpro_mat" << this->xpro_mats_[frameIdx];
-  //fs.release();
-  //fs.open("RecoChessPoint/ypro_mat" + IdxtoStr + ".xml", FileStorage::WRITE);
-  //fs << "ypro_mat" << this->ypro_mats_[frameIdx];
-  //fs.release();
-  /*CStorage proChessMat;
-  proChessMat.SetMatFileName("RecoChessPoint/" + IdxtoStr + "/", "vGray", ".bmp");
-  proChessMat.Store(this->m_grayV, GRAY_V_NUMDIGIT * 2);
-  proChessMat.SetMatFileName("RecoChessPoint/" + IdxtoStr + "/", "hGray", ".bmp");
-  proChessMat.Store(this->m_grayH, GRAY_H_NUMDIGIT * 2);
-  proChessMat.SetMatFileName("RecoChessPoint/" + IdxtoStr + "/", "vPhase", ".bmp");
-  proChessMat.Store(this->m_phaseV, PHASE_NUMDIGIT);
-  proChessMat.SetMatFileName("RecoChessPoint/" + IdxtoStr + "/", "hPhase", ".bmp");
-  proChessMat.Store(this->m_phaseH, PHASE_NUMDIGIT);
-  proChessMat.SetMatFileName("RecoChessPoint/" + IdxtoStr + "/", "ProMatDraw", ".bmp");
-  proChessMat.Store(&(this->m_proMatDraw), 1);*/
-
   return status;
 }

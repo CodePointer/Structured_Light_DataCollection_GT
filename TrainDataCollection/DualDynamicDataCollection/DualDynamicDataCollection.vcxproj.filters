@@ -51,6 +51,9 @@
     <ClCompile Include="main.cpp">
       <Filter>Other</Filter>
     </ClCompile>
+    <ClCompile Include="calibrator.cpp">
+      <Filter>Other</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cam_manager.h">
@@ -81,6 +84,9 @@
       <Filter>Global</Filter>
     </ClInclude>
     <ClInclude Include="data_collector.h">
+      <Filter>Other</Filter>
+    </ClInclude>
+    <ClInclude Include="calibrator.h">
       <Filter>Other</Filter>
     </ClInclude>
   </ItemGroup>

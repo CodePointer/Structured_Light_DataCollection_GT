@@ -3,6 +3,7 @@
 
 #include <opencv2/opencv.hpp>
 #include <vector>
+#include <sstream>
 #include "sensor_manager.h"
 #include "gray_decoder.h"
 #include "phase_decoder.h"
@@ -33,17 +34,6 @@ private:
   Mat pro_distor_;
   int stereo_size_;
   StereoCalibSet * stereo_set_;
-  
-  // Decoder
-  //GrayDecoder * m_decodeGray;	// 格雷码解码
-  //PhaseDecoder * m_decodePS;		// PS解码
-                                // 棋盘格的X、Y，以及图片数目
-
-  //Mat chess_mat_;
-  //int m_chessLine;
-  //int m_chessRow;
-  //int m_chessNum;
-  // 采集到的棋盘格图像和识别结果
 
   bool ReleaseSpace();			// 释放空间
   bool RecoChessPointObj(int frameIdx);		// 填充m_objPoint
