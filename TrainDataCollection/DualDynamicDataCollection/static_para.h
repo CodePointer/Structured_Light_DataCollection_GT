@@ -28,7 +28,7 @@ extern const int kShowPictureTime;
 extern const bool kVisualFlagForDebug;
 
 // Chess board parameters
-extern const bool kChessFrameNumber;
+extern const int kChessFrameNumber;
 extern const int kChessWidth;
 extern const int kChessHeight;
 extern const int kStereoSize;

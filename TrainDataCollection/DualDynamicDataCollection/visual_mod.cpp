@@ -18,14 +18,14 @@ int VisualModule::Show(Mat pic, int time, bool norm, double zoom) {
 	if (norm)	{
     // Set range
 		int range = 0;		
-		if (show.depth() == CV_8U) {
+		if (show_mat.depth() == CV_8U) {
 			range = 0xff;
-		}	else if (show.depth() == CV_16U) {
+		}	else if (show_mat.depth() == CV_16U) {
 			range = 0xffff;
-		}	else if (show.depth() == CV_64F) {
+		}	else if (show_mat.depth() == CV_64F) {
 			range = 0xffff;
 			Mat tmp;
-			tmp.create(show.size(), CV_16UC1);
+			tmp.create(show_mat.size(), CV_16UC1);
 			for (int h = 0; h < show_mat.size().height; h++) {
 				for (int w = 0; w < show_mat.size().width; w++)	{
 					double value;
@@ -67,13 +67,13 @@ int VisualModule::Show(Mat pic, int time, bool norm, double zoom) {
 int VisualModule::CombineShow(Mat * pics, int num, int time, double zoom) {
   Mat combine_mat, show_mat;
   //Size combine_size = Size(pic.size().width * num, pic.size().height);
-  Size show_size = Size(pic.size().width*zoom*num, pic.size().height*zoom);
+  Size show_size = Size(pics[0].size().width*zoom*num, pics[0].size().height*zoom);
   // Combine part: hconcat(B,C,A);
   Mat mat_B = pics[0];
   Mat mat_C;
   for (int i = 1; i < num; i++) {
-	  mat_C = pics[1];
-	  combine_mat = hconcat(mat_B, mat_C, combine_mat);
+	  mat_C = pics[i];
+	  hconcat(mat_B, mat_C, combine_mat);
 	  mat_B = combine_mat;
   }
   resize(combine_mat, show_mat, show_size, 0.0, 0.0, INTER_NEAREST);

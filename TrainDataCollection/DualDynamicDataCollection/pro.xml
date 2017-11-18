@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<pro_matrix type_id="opencv-matrix">
+  <rows>3</rows>
+  <cols>3</cols>
+  <dt>d</dt>
+  <data>
+    1.9099648970412184e+03 0. 6.4530332625204926e+02 0.
+    1.9149949402950599e+03 6.7593700041509931e+02 0. 0. 1.</data></pro_matrix>
+<pro_distor type_id="opencv-matrix">
+  <rows>1</rows>
+  <cols>5</cols>
+  <dt>d</dt>
+  <data>
+    1.6375559890369026e-01 4.9621205605866592e-01
+    -4.0023100502137032e-03 -1.0758709230323250e-02 0.</data></pro_distor>
+</opencv_storage>

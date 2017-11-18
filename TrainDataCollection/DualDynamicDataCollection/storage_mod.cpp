@@ -47,7 +47,7 @@ bool StorageModule::StoreAsText(Mat * text_mat, int num) {
       ss >> idx2str;
     }
     this->final_path_ = this->file_path_ + this->file_name_
-      + idx2str + this->file_suffix_;
+      + idx2str + ".txt";
     fstream file;
     file.open(this->final_path_, ios::out);
     int mat_height = text_mat[i].rows;
@@ -78,7 +78,7 @@ bool StorageModule::StoreAsXml(Mat *test_mat, int num) {
       ss >> idx2str;
     }
     this->final_path_ = this->file_path_ + this->file_name_
-      + idx2str + this->file_suffix_;
+      + idx2str + ".xml";
     FileStorage fs(this->final_path_, FileStorage::WRITE);
     fs << this->file_name_ << test_mat[i];
     fs.release();

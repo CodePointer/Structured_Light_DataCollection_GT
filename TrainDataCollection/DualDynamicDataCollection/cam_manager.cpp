@@ -80,7 +80,7 @@ bool CamManager::InitCamera() {
   // Set cameras
   for (int i = 0; i < this->sum_device_num_; i++) {
     // Open cameras
-    status = BeginHVDevice(i, &(this->device_handles_[i]));
+    status = BeginHVDevice(i+1, &(this->device_handles_[i]));
     HV_VERIFY(status);
     this->device_valid_[i] = true;
     // Set capture speed
@@ -90,7 +90,7 @@ bool CamManager::InitCamera() {
     status = HVSetResolution(this->device_handles_[i], RES_MODE0);
     HV_VERIFY(status);
     HVSetOutputWindow(this->device_handles_[i], 0, 0,
-                      this->img_height_, this->img_width_);
+                      this->img_width_, this->img_height_);
     // Capture some images to make camera begin to work
     int stable_num = 5;
     Mat tmp_mat;
@@ -130,7 +130,7 @@ bool CamManager::GetPicture(int idx, Mat & pic)
 	// if buffer is empty
 	if (this->buffer_used_ >= this->kBufferNum)
 	{
-		if (!this->SnapShot())
+		if (!this->SnapShot(idx))
 			return false;
 	}
 	// Create mat

@@ -9,8 +9,8 @@ const int kCamWidth = 1280;
 const int kCamHeight = 1024;
 
 // 计算机偏移量
-const int kScreenBiasHeight = 1920;
-const int kScreenBiasWidth = 0;
+const int kScreenBiasHeight = 0;
+const int kScreenBiasWidth = 1920;
 
 // 格雷码和PhaseShifting的数目
 const int kVerGrayNum = 6;
@@ -22,8 +22,8 @@ const int kShowPictureTime = 500;
 const bool kVisualFlagForDebug = false;
 
 //// 棋盘格相关参数
-const bool kChessFrameNumber = 15;
-const int kChessWidth = 9;
+const int kChessFrameNumber = 15;
+const int kChessWidth = 8;
 const int kChessHeight = 6;
 const int kStereoSize = kCamDeviceNum + kCamDeviceNum*(kCamDeviceNum - 1) / 2;
 

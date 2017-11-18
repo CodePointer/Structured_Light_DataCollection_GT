@@ -54,7 +54,7 @@ bool PhaseDecoder::CountResult()
 			float sinValue = (greyValue0 - greyValue2) / 2;
 			float cosValue = (greyValue1 - greyValue3) / 2;
 			float x = cvFastArctan(sinValue, cosValue);
-			float pix = (x) / (360)*(double)(this->pix_period_);
+			float pix = (x) / (360)*(float)(this->pix_period_);
 			pix += 0.5;
 			if (pix > this->pix_period_)
 				pix -= this->pix_period_;

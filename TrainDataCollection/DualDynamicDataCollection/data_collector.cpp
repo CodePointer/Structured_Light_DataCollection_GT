@@ -54,7 +54,7 @@ bool DataCollector::Init() {
 	// this->dyna_name_ = "part_pattern_2size4color";
 	this->dyna_name_ = "pattern_2size4color";
 	this->dyna_suffix_ = ".png";
-	this->wait_name_ = "part_pattern_2size4color";
+	this->wait_name_ = "pattern_2size4color";
 	this->wait_suffix_ = ".png";
 
 	// storage paths
@@ -88,7 +88,7 @@ bool DataCollector::Init() {
     this->cam_mats_[cam_idx].ver_gray = new Mat[kVerGrayNum * 2];
     this->cam_mats_[cam_idx].hor_gray = new Mat[kHorGrayNum * 2];
     this->cam_mats_[cam_idx].ver_phase = new Mat[kPhaseNum];
-    this->cam_mats_[cam_idx].ver_gray = new Mat[kPhaseNum];
+    this->cam_mats_[cam_idx].hor_phase = new Mat[kPhaseNum];
     this->cam_mats_[cam_idx].dyna = new Mat[this->max_frame_num_];
     this->cam_mats_[cam_idx].x_pro = new Mat[1];
     this->cam_mats_[cam_idx].y_pro = new Mat[1];
@@ -114,10 +114,10 @@ bool DataCollector::CollectData() {
     ss << now_group_idx;
     ss >> idx2str;
     StorageModule storage;
-    storage.CreateFolder(this->save_data_path_ 
-                         + idx2str + "/" + this->dyna_frame_path_);
-    storage.CreateFolder(this->save_data_path_ 
-                         + idx2str + "/" + this->pro_frame_path_);
+    //storage.CreateFolder(this->save_data_path_ 
+    //                     + idx2str + "/" + this->dyna_frame_path_);
+    //storage.CreateFolder(this->save_data_path_ 
+    //                     + idx2str + "/" + this->pro_frame_path_);
     // Wait for signal
     if (status) {
       int info = this->GetInputSignal(0);
@@ -174,6 +174,9 @@ int DataCollector::GetInputSignal(int frameNum) {
   printf("\t<y>: Continue\n");
   printf("\t<n>: End this group");
   printf("\t<e>: End program\n");
+  Mat cam_mat, little_mat;
+  Mat * cam_tmp = new Mat[kCamDeviceNum];
+  Mat * ltt_tmp = new Mat[kCamDeviceNum];
   // Set projector pattern as wait
   bool status = true;
   if (status) {
@@ -187,12 +190,13 @@ int DataCollector::GetInputSignal(int frameNum) {
   }
   // Show camera image on visualization module
   if (status) {
-    Mat cam_mat, little_mat;
     while (true) {
-      cam_mat = this->sensor_manager_->GetCamPicture();
-      little_mat = cam_mat(Range(502, 523), Range(630, 651));
-      int key1 = this->res_view_->Show(little_mat, 100, false, 20);
-      int key2 = this->cam_view_->Show(cam_mat, 100, false, 0.5);
+		  for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
+        cam_tmp[cam_idx] = this->sensor_manager_->GetCamPicture(cam_idx);
+        ltt_tmp[cam_idx] = cam_tmp[cam_idx](Range(502, 523), Range(630, 651));
+		  }
+      int key1 = this->res_view_->CombineShow(cam_tmp, kCamDeviceNum, 100, 0.5);
+      int key2 = this->cam_view_->CombineShow(ltt_tmp, kCamDeviceNum, 100, 20);
       if ((key1 == 'y') || (key2 == 'y')) {
         info = 0;
         break;
@@ -209,6 +213,8 @@ int DataCollector::GetInputSignal(int frameNum) {
   if (status) {
     this->sensor_manager_->UnloadPatterns();
   }
+  delete[]cam_tmp;
+  delete[]ltt_tmp;
   return info;
 }
 
@@ -219,6 +225,7 @@ bool DataCollector::CollectStaticFrame(int frameNum) {
 	Mat tmp_mul_collect;
 	Mat temp_total_mat;
 	Mat temp_mat;
+  Mat ver_gray_mat, ver_phase_mat, hor_gray_mat, hor_phase_mat;
 	temp_total_mat.create(kCamHeight, kCamWidth, CV_64FC1);
 
 	// ver_gray:
@@ -238,8 +245,8 @@ bool DataCollector::CollectStaticFrame(int frameNum) {
             tmp_mul_collect.convertTo(temp_mat, CV_64FC1);
             temp_total_mat += temp_mat / kMultiCollectNum;
           }
-          temp_total_mat.convertTo(
-              this->cam_mats_[cam_idx].ver_gray[i], CV_8UC1);
+          //this->cam_mats_[cam_idx].ver_gray[i].create(temp_total_mat.size(), CV_8UC1);
+          temp_total_mat.convertTo(this->cam_mats_[cam_idx].ver_gray[i], CV_8UC1);
         }
       }
 			
@@ -356,7 +363,7 @@ bool DataCollector::CollectDynamicFrame() {
       Mat CamMat = this->sensor_manager_->GetCamPicture(cam_idx);
       CamMat.copyTo(this->cam_mats_[cam_idx].dyna[frame_idx]);
     }
-		printf("\t\t%d frame.\n", frame_idx);
+		printf("%d frame.\n", frame_idx);
 	}
 	// Unload projector pattern
 	if (status) {
@@ -410,7 +417,7 @@ bool DataCollector::DecodeSingleFrame(int frameNum) {
       hor_gray_mat = hgray_decoder.GetResult();
     }
     PhaseDecoder vphase_decoder;
-    int ver_period = kProWidth / (1 << kVerGrayNum - 1);
+    int ver_period = kProWidth / (1 << (kVerGrayNum - 1));
     if (status) {
       status = vphase_decoder.SetNumDigit(kPhaseNum, ver_period);
     }
@@ -424,7 +431,7 @@ bool DataCollector::DecodeSingleFrame(int frameNum) {
       ver_phase_mat = vphase_decoder.GetResult();
     }
     PhaseDecoder hphase_decoder;
-    int hor_period = kProHeight / (1 << kHorGrayNum - 1);
+    int hor_period = kProHeight / (1 << (kHorGrayNum - 1));
     if (status) {
       status = hphase_decoder.SetNumDigit(kPhaseNum, hor_period);
     }
@@ -441,7 +448,7 @@ bool DataCollector::DecodeSingleFrame(int frameNum) {
     // Combine
     if (status) {
       int ver_gray_num = 1 << kVerGrayNum;
-      int ver_period = kProWidth / (1 << kVerGrayNum - 1);
+      int ver_period = kProWidth / (1 << (kVerGrayNum - 1));
       int ver_gray_period = kProWidth / ver_gray_num;
       //this->my_debug_->Show(ver_gray_mat, 0, true, 0.5);
       //this->my_debug_->Show(ver_phase_mat, 0, true, 0.5);
@@ -473,7 +480,7 @@ bool DataCollector::DecodeSingleFrame(int frameNum) {
     }
     if (status) {
       int hor_gray_num = 1 << kHorGrayNum;
-      int hor_period = kProHeight / (1 << kHorGrayNum - 1);
+      int hor_period = kProHeight / (1 << (kHorGrayNum - 1));
       int hor_gray_period = kProHeight / hor_gray_num;
       //this->my_debug_->Show(tmp_gray_mat, 0, true, 0.5);
       //this->my_debug_->Show(tmp_phase_mat, 0, true, 0.5);

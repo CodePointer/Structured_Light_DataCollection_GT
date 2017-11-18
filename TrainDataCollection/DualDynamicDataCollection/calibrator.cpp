@@ -2,7 +2,7 @@
 
 //CVisualization myDebug("Debug");
 VisualModule cam_visual("CameraShow");
-VisualModule myProjector("ProjectorShow");
+VisualModule pro_visual("ProjectorShow");
 
 // Set NULL to pointers
 Calibrator::Calibrator() {
@@ -71,7 +71,7 @@ bool Calibrator::Init() {
   }
   // Chess points reco
   this->cam_points_ = new vector<vector<Point2f>>[kCamDeviceNum];
-  this->tmp_cam_points_ = new vector<vector<Point2f>>[kCamDeviceNum];
+  this->tmp_cam_points_ = new vector<Point2f>[kCamDeviceNum];
   for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
     vector<vector<cv::Point2f>>().swap(this->cam_points_[cam_idx]);
   }
@@ -135,18 +135,18 @@ bool Calibrator::Calibrate() {
   printf("Begin Calibrating.\n");
   for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
     calibrateCamera(this->obj_points_,
-      this->cam_points_,
+      this->cam_points_[cam_idx],
       Size(kCamWidth, kCamHeight),
       this->cam_matrix_[cam_idx],
       this->cam_distor_[cam_idx],
       noArray(),
       noArray(),
-      CALIB_FIX_K3 + CALIB_FIX_PRINCIPAL_POINT,
-      TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 300, 1e-16));
+      CALIB_FIX_K3,
+      TermCriteria(TermCriteria::COUNT + TermCriteria::EPS, 30, 1e-16));
     printf("Finish cam[%d].\n", cam_idx);
   }
   calibrateCamera(this->obj_points_,
-    this->cam_points_,
+    this->pro_points_,
     Size(kProWidth, kProHeight),
     this->pro_matrix_,
     this->pro_distor_,
@@ -199,7 +199,7 @@ bool Calibrator::Calibrate() {
   return true;
 }
 
-// 输出保存数据
+// Output and save
 bool Calibrator::Result() {
   // Output individuals
   for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
@@ -240,8 +240,8 @@ bool Calibrator::Result() {
       ss_2 >> idx2str_2;
       FileStorage fs_cam_cam("cam" + idx2str_1 + "_cam" + idx2str_2 + ".xml",
                              FileStorage::WRITE);
-      fs_cam_cam << "rot" << this->stereo_set_[ste_idx];
-      fs_cam_cam << "trans" << this->stereo_set_[ste_idx];
+      fs_cam_cam << "rot" << this->stereo_set_[ste_idx].R;
+      fs_cam_cam << "trans" << this->stereo_set_[ste_idx].T;
       fs_cam_cam.release();
     }
   }
@@ -254,7 +254,7 @@ bool Calibrator::RecoChessPointObj(int frameIdx) {
   vector<Point3f>().swap(this->tmp_obj_points_);
   for (int x = 0; x < kChessWidth; x++) {
     for (int y = 0; y < kChessHeight; y++) {
-      this->m_objPointTmp.push_back(Point3f(x, y, 0));
+      this->tmp_obj_points_.push_back(Point3f(x, y, 0));
     }
   }
   return true;
@@ -263,9 +263,15 @@ bool Calibrator::RecoChessPointObj(int frameIdx) {
 // Reco cam_points and fill in
 bool Calibrator::RecoChessPointCam(int frameIdx) {
   bool status = true;
-  vector<Point2f>().swap(this->m_camPointTmp);
+  for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
+    vector<Point2f>().swap(this->tmp_cam_points_[cam_idx]);
+  }
   Mat * cam_tmp;
   cam_tmp = new Mat[kCamDeviceNum];
+  // Set picture
+  this->sensor_->LoadPatterns(1, this->pattern_path_, "empty", ".bmp");
+  this->sensor_->SetProPicture(0);
+  this->sensor_->UnloadPatterns();
   while (true) {
     bool reco_flag = true;
     for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
@@ -284,7 +290,7 @@ bool Calibrator::RecoChessPointCam(int frameIdx) {
         /*drawChessboardCorners(
             cam_tmp[cam_idx], Size(kChessHeight, kChessWidth), 
             this->tmp_cam_points_[cam_idx], found);*/
-        cam_visual.Show(cam_tmp[cam_idx], 100, false, 0.5);
+        pro_visual.Show(cam_tmp[cam_idx], 100, false, 0.5);
         if (found) {
           printf("Success for cam[%d].\n", cam_idx);
           break;
@@ -299,9 +305,12 @@ bool Calibrator::RecoChessPointCam(int frameIdx) {
         cornerSubPix(
             cam_tmp[cam_idx], this->tmp_cam_points_[cam_idx], Size(5,5), Size(-1,-1), 
             TermCriteria(TermCriteria::MAX_ITER + TermCriteria::EPS, 30, 0.1));
+        Mat draw_mat;
+        cam_tmp[cam_idx].copyTo(draw_mat);
         drawChessboardCorners(
-            cam_tmp[cam_idx], Size(kChessHeight, kChessWidth),
+            draw_mat, Size(kChessHeight, kChessWidth),
             this->tmp_cam_points_[cam_idx], found);
+        pro_visual.Show(draw_mat, 100, false, 0.5);
       }
     }
     if (reco_flag) {
@@ -323,7 +332,7 @@ bool Calibrator::RecoChessPointPro(int frameIdx) {
   Mat tmp_mul_collect;
   Mat tmp_mat;
   Mat temp_total_mat;
-  temp_total_mat.create(CAMERA_RESROW, CAMERA_RESLINE, CV_64FC1);
+  temp_total_mat.create(kCamHeight, kCamWidth, CV_64FC1);
   int ver_period, hor_period;
   int ver_gray_num, hor_gray_num;
   int ver_gray_period, hor_gray_period;
@@ -371,8 +380,8 @@ bool Calibrator::RecoChessPointPro(int frameIdx) {
     temp_total_mat.setTo(0);
     for (int k = 0; k < kMultiCollectNum; k++) {
       tmp_mul_collect = this->sensor_->GetCamPicture(0);
-      tmp_mul_collect.convertTo(tempMat, CV_64FC1);
-      temp_total_mat += tempMat / kMultiCollectNum;
+      tmp_mul_collect.convertTo(tmp_mat, CV_64FC1);
+      temp_total_mat += tmp_mat / kMultiCollectNum;
     }
     temp_total_mat.convertTo(this->cam_mats_[0].hor_phase[i], CV_8UC1);
   }
@@ -381,16 +390,16 @@ bool Calibrator::RecoChessPointPro(int frameIdx) {
   // Decode
   GrayDecoder vgray_decoder;
   vgray_decoder.SetNumDigit(kVerGrayNum, true);
-  vgray_decoder.SetCodeFileName(this->pattern_path_, "vGray.txt");
-  for (int i = 0; i < kVerGrayNum; i++) {
+  vgray_decoder.SetCodeFileName(this->pattern_path_, "vGrayCode.txt");
+  for (int i = 0; i < kVerGrayNum * 2; i++) {
     vgray_decoder.SetMat(i, this->cam_mats_[0].ver_gray[i]);
   }
   vgray_decoder.Decode();
   ver_gray_mat = vgray_decoder.GetResult();
   GrayDecoder hgray_decoder;
   hgray_decoder.SetNumDigit(kHorGrayNum, false);
-  hgray_decoder.SetCodeFileName(this->pattern_path_, "hGray.txt");
-  for (int i = 0; i < kHorGrayNum; i++) {
+  hgray_decoder.SetCodeFileName(this->pattern_path_, "hGrayCode.txt");
+  for (int i = 0; i < kHorGrayNum * 2; i++) {
     hgray_decoder.SetMat(i, this->cam_mats_[0].hor_gray[i]);
   }
   hgray_decoder.Decode();
@@ -413,10 +422,10 @@ bool Calibrator::RecoChessPointPro(int frameIdx) {
   hor_phase_mat = hphase_decoder.GetResult();
 
   // Combine
-  /*myProjector.Show(vGrayMat, 0, true, 0.5);
-  myProjector.Show(hGrayMat, 0, true, 0.5);
-  myProjector.Show(vPhaseMat, 0, true, 0.5);
-  myProjector.Show(hPhaseMat, 0, true, 0.5);*/
+  //pro_visual.Show(ver_gray_mat, 0, true, 0.5);
+  //pro_visual.Show(hor_gray_mat, 0, true, 0.5);
+  //pro_visual.Show(ver_phase_mat, 0, true, 0.5);
+  //pro_visual.Show(hor_phase_mat, 0, true, 0.5);
   ver_gray_num = 1 << kVerGrayNum;
   ver_gray_period = kProWidth / ver_gray_num;
   for (int h = 0; h < kCamHeight; h++) {
@@ -468,9 +477,29 @@ bool Calibrator::RecoChessPointPro(int frameIdx) {
       }
     }
   }
-  /*this->my_debug_->Show(tmp_gray_mat, 0, true, 0.5);
-  this->my_debug_->Show(tmp_phase_mat, 0, true, 0.5);*/
   this->cam_mats_[0].y_pro[0] = hor_gray_mat + hor_phase_mat;
+  for (int h = 1; h < kCamHeight - 1; h++) {
+    for (int w = 1; w < kCamWidth - 1; w++) {
+      double x_pro_val = this->cam_mats_[0].x_pro[0].at<double>(h, w);
+      if (x_pro_val < 0) {
+        double x_up_val = this->cam_mats_[0].x_pro[0].at<double>(h - 1, w);
+        double x_dn_val = this->cam_mats_[0].x_pro[0].at<double>(h + 1, w);
+        if ((x_up_val > 0) && (x_dn_val > 0)) {
+          this->cam_mats_[0].x_pro[0].at<double>(h, w) = (x_up_val + x_dn_val) / 2;
+        }
+      }
+      double y_pro_val = this->cam_mats_[0].y_pro[0].at<double>(h, w);
+      if (y_pro_val < 0) {
+        double y_lf_val = this->cam_mats_[0].y_pro[0].at<double>(h, w - 1);
+        double y_rt_val = this->cam_mats_[0].y_pro[0].at<double>(h, w + 1);
+        if ((y_lf_val > 0) && (y_rt_val > 0)) {
+          this->cam_mats_[0].y_pro[0].at<double>(h, w) = (y_lf_val + y_rt_val) / 2;
+        }
+      }
+    }
+  }
+  //pro_visual.Show(this->cam_mats_[0].x_pro[0], 0, true, 0.5);
+  //pro_visual.Show(this->cam_mats_[0].y_pro[0], 0, true, 0.5);
 
   // projector coord
   vector<Point2f>::iterator i;
@@ -489,7 +518,7 @@ bool Calibrator::RecoChessPointPro(int frameIdx) {
   draw_mat.setTo(0);
   drawChessboardCorners(
       draw_mat, Size(kChessHeight, kChessWidth), this->tmp_pro_points_, true);
-  int key = myProjector.Show(draw_mat, 0, false, 0.5);
+  int key = pro_visual.Show(draw_mat, 0, false, 0.5);
   if (key == 'y') {
     status = true;
   } else {

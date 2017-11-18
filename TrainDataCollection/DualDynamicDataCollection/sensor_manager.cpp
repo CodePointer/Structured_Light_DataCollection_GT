@@ -85,7 +85,7 @@ bool SensorManager::LoadPatterns(int pattern_num, string file_path,
     ss >> idx2Str;
     
     Mat tmp_mat;
-    string read_path = this->file_path_ + this->file_name_ + idx2Str + this->m_fileSuffix;
+    string read_path = this->file_path_ + this->file_name_ + idx2Str + this->file_suffix_;
     tmp_mat = imread(read_path, CV_LOAD_IMAGE_GRAYSCALE);
     tmp_mat.copyTo(this->pattern_mats_[i]);
 
@@ -132,7 +132,9 @@ Mat SensorManager::GetCamPicture(int idx) {
 	bool status = true;
 	Mat tmpMat;
 	status = this->cam_device_->GetPicture(idx, tmpMat);
-	return tmpMat;
+  Mat output_mat;
+  tmpMat.copyTo(output_mat);
+	return output_mat;
 }
 
 // 获取投影仪投影的图像
