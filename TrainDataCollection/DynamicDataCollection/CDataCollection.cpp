@@ -193,7 +193,7 @@ bool DataCollector::CollectData()
 			status = this->VisualizationForDynamicScene(this->max_frame_num_);
 		}
 		if (status) {
-			status = this->StorageData(nowGroupIdx);
+			status = this->StorageDataByGroup(nowGroupIdx);
 		}
 	}
 
@@ -635,7 +635,7 @@ bool DataCollector::Close()
 }
 
 
-bool DataCollector::StorageData(int groupNum)
+bool DataCollector::StorageDataByGroup(int groupNum)
 {
 	if (!this->storage_flag_)
 		return true;

@@ -90,8 +90,8 @@ bool DataCollector::Init() {
     this->cam_mats_[cam_idx].ver_phase = new Mat[kPhaseNum];
     this->cam_mats_[cam_idx].hor_phase = new Mat[kPhaseNum];
     this->cam_mats_[cam_idx].dyna = new Mat[this->max_frame_num_];
-    this->cam_mats_[cam_idx].x_pro = new Mat[1];
-    this->cam_mats_[cam_idx].y_pro = new Mat[1];
+    this->cam_mats_[cam_idx].x_pro = new Mat[this->max_frame_num_];
+    this->cam_mats_[cam_idx].y_pro = new Mat[this->max_frame_num_];
   }
 	this->cam_view_ = new VisualModule("Camera");
   this->res_view_ = new VisualModule("Result");
@@ -99,7 +99,7 @@ bool DataCollector::Init() {
 	return status;
 }
 
-bool DataCollector::CollectData() {
+bool DataCollector::CollectDynaData() {
 	bool status = true;
 
 	int now_group_idx = 0;
@@ -114,13 +114,9 @@ bool DataCollector::CollectData() {
     ss << now_group_idx;
     ss >> idx2str;
     StorageModule storage;
-    //storage.CreateFolder(this->save_data_path_ 
-    //                     + idx2str + "/" + this->dyna_frame_path_);
-    //storage.CreateFolder(this->save_data_path_ 
-    //                     + idx2str + "/" + this->pro_frame_path_);
     // Wait for signal
     if (status) {
-      int info = this->GetInputSignal(0);
+      int info = this->GetInputSignal();
       if (info == 2) { // End this program
         break;
       }
@@ -128,7 +124,6 @@ bool DataCollector::CollectData() {
         continue;
       }
     }
-
 		// --------------------------------------------
 		// First, collect frame_0 picture		
 		// frame_0 should have the depth value	
@@ -156,11 +151,82 @@ bool DataCollector::CollectData() {
 			status = this->VisualizationForDynamicScene(this->max_frame_num_);
 		}
 		if (status) {
-			status = this->StorageData(now_group_idx);
+			status = this->StorageDataByGroup(now_group_idx);
 		}
 	}
 
 	return status;
+}
+
+bool DataCollector::CollectStatData() {
+  bool status = true;
+  int now_group_idx = 0;
+  int max_group_num = 5;
+
+  printf("Begin collection.\n");
+  while (now_group_idx++ <= max_group_num) {
+    printf("Now group: %d\n", now_group_idx);
+    // First create folder for now group
+    string idx2str;
+    stringstream ss;
+    ss << now_group_idx;
+    ss >> idx2str;
+    StorageModule storage;
+    
+    // Collect each frames
+    bool exit_flag = false;
+    for (int frame_idx = 0; frame_idx < this->max_frame_num_; frame_idx++) {
+      // Wait for signal
+      printf("frm[%d]:\n", frame_idx);
+      if (status) {
+        int info = this->GetInputSignal();
+        if (info == 2) { // End this program
+          exit_flag = true;
+          break;
+        }
+        else if (info == 1) { // End this group
+          break;
+        }
+      }
+      // Collect static frame and decode
+      if (status) {
+        status = this->CollectStaticFrame(frame_idx);
+      }
+      if (status) {
+        status = this->sensor_manager_->LoadPatterns(1,
+			    this->pattern_path_,
+			    this->dyna_name_,
+			    this->dyna_suffix_);
+	    }
+	    if (status) {
+		    status = this->sensor_manager_->SetProPicture(0);
+	    }
+      if (status) {
+        for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
+          Mat Cam_mat = this->sensor_manager_->GetCamPicture(cam_idx);
+          Cam_mat.copyTo(this->cam_mats_[cam_idx].dyna[frame_idx]);
+        }
+        status = this->sensor_manager_->UnloadPatterns();
+      }
+      if (status) {
+        status = this->DecodeSingleFrame(frame_idx);
+      }
+      // Show and Check: storage or not
+      if (status) {
+        printf("\t<Y>/<N>\n");
+        status = this->VisualizationForStaticScene(frame_idx);
+      }
+      if (status) {
+        this->StorageDataByFrame(now_group_idx, frame_idx);
+      } else {
+        frame_idx--;
+        status = true;
+      }
+    }
+    if (exit_flag)
+      break;
+  }
+  return status;
 }
 
 // return:
@@ -168,12 +234,10 @@ bool DataCollector::CollectData() {
 //     1: End collection of this group
 //     2: End collection of program
 //     3: Error
-int DataCollector::GetInputSignal(int frameNum) {
+int DataCollector::GetInputSignal() {
   int info = 0;
   // Output information
-  printf("\t<y>: Continue\n");
-  printf("\t<n>: End this group");
-  printf("\t<e>: End program\n");
+  printf("\t<Y_es>/<N_extgroup>/<E_scape>\n");
   Mat cam_mat, little_mat;
   Mat * cam_tmp = new Mat[kCamDeviceNum];
   Mat * ltt_tmp = new Mat[kCamDeviceNum];
@@ -548,6 +612,36 @@ bool DataCollector::VisualizationForDynamicScene(int total_frame_num) {
 	return status;
 }
 
+bool DataCollector::VisualizationForStaticScene(int frame_idx) {
+  int key;
+  bool status = true;
+  while (true) {
+    for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
+      key = this->cam_view_->Show(
+          this->cam_mats_[cam_idx].x_pro[frame_idx], 500, true, 0.5);
+      if (key == 'y' || key == 'n')
+        break;
+      key = this->cam_view_->Show(
+          this->cam_mats_[cam_idx].y_pro[frame_idx], 500, true, 0.5);
+      if (key == 'y' || key == 'n')
+        break;
+      key = this->cam_view_->Show(
+          this->cam_mats_[cam_idx].dyna[frame_idx], 500, false, 0.5);
+      if (key == 'y' || key == 'n')
+        break;
+    }
+    if (key == 'y' || key == 'n')
+      break;
+  }
+  if (key == 'y') {
+    status = true;
+  }
+  else if (key == 'n') {
+    status = false;
+  }
+  return status;
+}
+
 bool DataCollector::Close() {
 	bool status = true;
 	if (status)	{
@@ -556,12 +650,12 @@ bool DataCollector::Close() {
 	return status;
 }
 
-bool DataCollector::StorageData(int groupNum) {
+bool DataCollector::StorageDataByGroup(int group_num) {
 	if (!this->storage_flag_)
 		return true;
 	// Set Folder
 	stringstream ss;
-	ss << groupNum << "/";
+	ss << group_num << "/";
 	string group_folder_path;
 	ss >> group_folder_path;
   StorageModule store;
@@ -595,4 +689,45 @@ bool DataCollector::StorageData(int groupNum) {
     store.StoreAsText(this->cam_mats_[cam_idx].y_pro, 1);
   }
 	return true;
+}
+
+bool DataCollector::StorageDataByFrame(int group_num, int frame_idx) {
+  if (!this->storage_flag_)
+    return true;
+  // Set Folder
+  stringstream ss;
+  ss << group_num << "/";
+  string group_folder_path;
+  ss >> group_folder_path;
+  StorageModule store;
+
+  for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
+    // CamFolderInfo
+    stringstream ss_cam;
+    ss_cam << "cam_" << cam_idx << "/";
+    string cam_folder_path;
+    ss_cam >> cam_folder_path;
+
+    // Save dyna mats
+    store.SetMatFileName(
+        this->save_data_path_ + group_folder_path + cam_folder_path
+        + this->dyna_frame_path_, this->dyna_frame_name_,
+        this->dyna_frame_suffix_);
+    store.StoreAsImage(&this->cam_mats_[cam_idx].dyna[frame_idx], 1);
+    // Save x_pro
+    store.SetMatFileName(
+        this->save_data_path_ + group_folder_path + cam_folder_path
+        + this->pro_frame_path_, this->xpro_frame_name_,
+        this->pro_frame_suffix_);
+    store.StoreAsXml(&this->cam_mats_[cam_idx].x_pro[frame_idx], 1);
+    store.StoreAsText(&this->cam_mats_[cam_idx].x_pro[frame_idx], 1);
+    // Save y_pro
+    store.SetMatFileName(
+        this->save_data_path_ + group_folder_path + cam_folder_path
+        + this->pro_frame_path_, this->ypro_frame_name_,
+        this->pro_frame_suffix_);
+    store.StoreAsXml(&this->cam_mats_[cam_idx].y_pro[frame_idx], 1);
+    store.StoreAsText(&this->cam_mats_[cam_idx].y_pro[frame_idx], 1);
+  }
+  return true;
 }

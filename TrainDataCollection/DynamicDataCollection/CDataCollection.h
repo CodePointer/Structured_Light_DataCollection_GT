@@ -66,7 +66,7 @@ private:
 	bool storage_flag_;
 	int max_frame_num_;
 
-	bool StorageData(int groupNum);
+	bool StorageDataByGroup(int groupNum);
 	int GetInputSignal(int frameNum);
 	bool CollectStaticFrame(int frameNum);
 	bool CollectDynamicFrame();

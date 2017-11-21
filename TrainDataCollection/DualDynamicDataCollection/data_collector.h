@@ -55,18 +55,21 @@ private:
 	bool storage_flag_;
 	int max_frame_num_;
 
-	bool StorageData(int groupNum);
-	int GetInputSignal(int frameNum);
+	bool StorageDataByGroup(int group_num);
+  bool StorageDataByFrame(int group_num, int frame_idx);
+	int GetInputSignal();
 	bool CollectStaticFrame(int frameNum);
 	bool CollectDynamicFrame();
 	bool DecodeSingleFrame(int frameNum);
 	bool VisualizationForDynamicScene(int total_frame_num);
+  bool VisualizationForStaticScene(int frame_idx);
 
 public:
 	DataCollector();
 	~DataCollector();
 	bool Init();
-	bool CollectData();
+	bool CollectDynaData();
+  bool CollectStatData();
 	bool Close();
 };
 

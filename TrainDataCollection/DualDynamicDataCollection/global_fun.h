@@ -10,6 +10,4 @@ using namespace cv;
 // Handling the errors occured in program
 int ErrorHandling(string message);
 
-void Double2Uchar(Mat src_mat, Mat & dst_mat);
-
 #endif
