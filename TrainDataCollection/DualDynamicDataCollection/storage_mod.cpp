@@ -10,19 +10,16 @@ StorageModule::StorageModule() {
 StorageModule::~StorageModule() {
 }
 
-bool StorageModule::StoreAsImage(Mat * pictures, int num) {
+bool StorageModule::StoreAsImage(Mat * pictures, int num, int sta_idx) {
   if (num <= 0)
     return false;
 	bool status = true;
 	for (int i = 0; i < num; i++)	{
 		string idx2str;
-		if (num == 1) {
-      idx2str = "";
-		}	else {
-			std::strstream ss;
-			ss << i;
-			ss >> idx2str;
-		}
+		std::strstream ss;
+		ss << i + sta_idx;
+		ss >> idx2str;
+
     this->final_path_ = this->file_path_ + this->file_name_
         + idx2str + this->file_suffix_;
 		status = imwrite(this->final_path_, pictures[i]);
@@ -32,20 +29,15 @@ bool StorageModule::StoreAsImage(Mat * pictures, int num) {
 	return status;
 }
 
-bool StorageModule::StoreAsText(Mat * text_mat, int num) {
+bool StorageModule::StoreAsText(Mat * text_mat, int num, int sta_idx) {
   if (num <= 0)
     return false;
   bool status = true;
   for (int i = 0; i < num; i++) {
     string idx2str;
-    if (num == 1) {
-      idx2str = "";
-    }
-    else {
-      std::strstream ss;
-      ss << i;
-      ss >> idx2str;
-    }
+    std::strstream ss;
+    ss << i + sta_idx;
+    ss >> idx2str;
     this->final_path_ = this->file_path_ + this->file_name_
       + idx2str + ".txt";
     fstream file;
@@ -63,20 +55,15 @@ bool StorageModule::StoreAsText(Mat * text_mat, int num) {
   return status;
 }
 
-bool StorageModule::StoreAsXml(Mat *test_mat, int num) {
+bool StorageModule::StoreAsXml(Mat *test_mat, int num, int sta_idx) {
   if (num <= 0)
     return false;
   bool status = true;
   for (int i = 0; i < num; i++) {
     string idx2str;
-    if (num == 1) {
-      idx2str = "";
-    }
-    else {
-      std::strstream ss;
-      ss << i;
-      ss >> idx2str;
-    }
+    std::strstream ss;
+    ss << i + sta_idx;
+    ss >> idx2str;
     this->final_path_ = this->file_path_ + this->file_name_
       + idx2str + ".xml";
     FileStorage fs(this->final_path_, FileStorage::WRITE);

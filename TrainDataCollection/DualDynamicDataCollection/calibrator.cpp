@@ -211,11 +211,25 @@ bool Calibrator::Result() {
     fs_cam << "cam_matrix" << this->cam_matrix_[cam_idx];
     fs_cam << "cam_distor" << this->cam_distor_[cam_idx];
     fs_cam.release();
+    fstream file_cam;
+    file_cam.open("cam" + idx2str + ".txt", ios::out);
+    file_cam << "cam_matrix" << endl;
+    file_cam << this->cam_matrix_[cam_idx] << endl;
+    file_cam << "cam_distor" << endl;
+    file_cam << this->cam_distor_[cam_idx] << endl;
+    file_cam.close();
   }
   FileStorage fs_pro("pro.xml", FileStorage::WRITE);
   fs_pro << "pro_matrix" << this->pro_matrix_;
   fs_pro << "pro_distor" << this->pro_distor_;
   fs_pro.release();
+  fstream file_pro;
+  file_pro.open("pro.txt", ios::out);
+  file_pro << "pro_matrix" << endl;
+  file_pro << this->pro_matrix_ << endl;
+  file_pro << "pro_distor" << endl;
+  file_pro << this->pro_distor_ << endl;
+  file_pro.close();
   // Stereo parameters
   for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
     stringstream ss;
@@ -226,6 +240,13 @@ bool Calibrator::Result() {
     fs_cam_pro << "rot" << this->stereo_set_[cam_idx].R;
     fs_cam_pro << "trans" << this->stereo_set_[cam_idx].T;
     fs_cam_pro.release();
+    fstream file_cam_pro;
+    file_cam_pro.open("cam" + idx2str + "_pro.txt", ios::out);
+    file_cam_pro << "rot" << endl;
+    file_cam_pro << this->stereo_set_[cam_idx].R << endl;
+    file_cam_pro << "trans" << endl;
+    file_cam_pro << this->stereo_set_[cam_idx].T << endl;
+    file_cam_pro.close();
   }
   int ste_idx = kCamDeviceNum;
   for (int c_1 = 0; c_1 < kCamDeviceNum; c_1++) {
@@ -243,6 +264,14 @@ bool Calibrator::Result() {
       fs_cam_cam << "rot" << this->stereo_set_[ste_idx].R;
       fs_cam_cam << "trans" << this->stereo_set_[ste_idx].T;
       fs_cam_cam.release();
+      fstream file_cam_cam;
+      file_cam_cam.open("cam" + idx2str_1 + "_cam" + idx2str_2 + ".txt", 
+                        ios::out);
+      file_cam_cam << "rot" << endl;
+      file_cam_cam << this->stereo_set_[ste_idx].R << endl;
+      file_cam_cam << "trans" << endl;
+      file_cam_cam << this->stereo_set_[ste_idx].T << endl;
+      file_cam_cam.close();
     }
   }
   printf("Calibration Finished.\n");

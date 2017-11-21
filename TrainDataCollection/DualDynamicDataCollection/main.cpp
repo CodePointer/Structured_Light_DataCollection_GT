@@ -8,6 +8,7 @@ int main()
 		status = dc.Init();
 	}
 	if (status)	{
+    //status = dc.CollectStatData();
 		status = dc.CollectDynaData();
 	}
 	if (status)	{

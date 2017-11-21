@@ -20,9 +20,9 @@ private:
 public:
 	StorageModule();
 	~StorageModule();
-	bool StoreAsImage(Mat *pictures, int num);		// Store mat as image type
-  bool StoreAsText(Mat *text_mat, int num);     // Store mat as text type
-  bool StoreAsXml(Mat *test_mat, int num);      // Store mat as xml
+	bool StoreAsImage(Mat *pictures, int num, int sta_idx = 0);		// Store mat as image type
+  bool StoreAsText(Mat *text_mat, int num, int sta_idx = 0);     // Store mat as text type
+  bool StoreAsXml(Mat *test_mat, int num, int sta_idx = 0);      // Store mat as xml
 
 	bool SetMatFileName(string file_path, string file_name, string file_suffix);
 	bool CreateFolder(string FilePath);

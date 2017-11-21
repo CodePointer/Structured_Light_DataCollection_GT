@@ -58,7 +58,7 @@ bool DataCollector::Init() {
 	this->wait_suffix_ = ".png";
 
 	// storage paths
-	this->save_data_path_ = "E:/Structured_Light_Data/20171104/";
+	this->save_data_path_ = "E:/Structured_Light_Data/20171121/";
 	this->dyna_frame_path_ = "dyna/";
 	this->dyna_frame_name_ = "dyna_mat";
 	this->dyna_frame_suffix_ = ".png";
@@ -285,7 +285,7 @@ int DataCollector::GetInputSignal() {
 // Collect first frame
 bool DataCollector::CollectStaticFrame(int frameNum) {
 	bool status = true;
-	int kMultiCollectNum = 5;
+	int kMultiCollectNum = 3;
 	Mat tmp_mul_collect;
 	Mat temp_total_mat;
 	Mat temp_mat;
@@ -713,21 +713,21 @@ bool DataCollector::StorageDataByFrame(int group_num, int frame_idx) {
         this->save_data_path_ + group_folder_path + cam_folder_path
         + this->dyna_frame_path_, this->dyna_frame_name_,
         this->dyna_frame_suffix_);
-    store.StoreAsImage(&this->cam_mats_[cam_idx].dyna[frame_idx], 1);
+    store.StoreAsImage(&this->cam_mats_[cam_idx].dyna[frame_idx], 1, frame_idx);
     // Save x_pro
     store.SetMatFileName(
         this->save_data_path_ + group_folder_path + cam_folder_path
         + this->pro_frame_path_, this->xpro_frame_name_,
         this->pro_frame_suffix_);
-    store.StoreAsXml(&this->cam_mats_[cam_idx].x_pro[frame_idx], 1);
-    store.StoreAsText(&this->cam_mats_[cam_idx].x_pro[frame_idx], 1);
+    store.StoreAsXml(&this->cam_mats_[cam_idx].x_pro[frame_idx], 1, frame_idx);
+    store.StoreAsText(&this->cam_mats_[cam_idx].x_pro[frame_idx], 1, frame_idx);
     // Save y_pro
     store.SetMatFileName(
         this->save_data_path_ + group_folder_path + cam_folder_path
         + this->pro_frame_path_, this->ypro_frame_name_,
         this->pro_frame_suffix_);
-    store.StoreAsXml(&this->cam_mats_[cam_idx].y_pro[frame_idx], 1);
-    store.StoreAsText(&this->cam_mats_[cam_idx].y_pro[frame_idx], 1);
+    store.StoreAsXml(&this->cam_mats_[cam_idx].y_pro[frame_idx], 1, frame_idx);
+    store.StoreAsText(&this->cam_mats_[cam_idx].y_pro[frame_idx], 1, frame_idx);
   }
   return true;
 }
