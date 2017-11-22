@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<opencv_storage>
+<cam_matrix type_id="opencv-matrix">
+  <rows>3</rows>
+  <cols>3</cols>
+  <dt>d</dt>
+  <data>
+    2.4282705010265231e+03 0. 7.1718796175223861e+02 0.
+    2.4255248475308063e+03 4.1964507314652093e+02 0. 0. 1.</data></cam_matrix>
+<cam_distor type_id="opencv-matrix">
+  <rows>1</rows>
+  <cols>5</cols>
+  <dt>d</dt>
+  <data>
+    -1.6793135530275855e-02 4.1666192295939902e-01
+    -1.2841579987114812e-02 1.3122616937688117e-02 0.</data></cam_distor>
+</opencv_storage>

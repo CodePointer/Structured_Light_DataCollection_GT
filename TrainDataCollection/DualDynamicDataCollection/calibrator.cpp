@@ -255,6 +255,9 @@ bool Calibrator::Result() {
     string idx2str_1;
     ss_1 >> idx2str_1;
     for (int c_2 = 1; c_2 < kCamDeviceNum; c_2++) {
+      if (c_1 == c_2) {
+        continue;
+      }
       stringstream ss_2;
       ss_2 << c_2;
       string idx2str_2;
@@ -272,6 +275,7 @@ bool Calibrator::Result() {
       file_cam_cam << "trans" << endl;
       file_cam_cam << this->stereo_set_[ste_idx].T << endl;
       file_cam_cam.close();
+      ste_idx++;
     }
   }
   printf("Calibration Finished.\n");
@@ -538,7 +542,21 @@ bool Calibrator::RecoChessPointPro(int frameIdx) {
     int X = cam.x;
     int Y = cam.y;
     pro.x = this->cam_mats_[0].x_pro[0].at<double>(Y, X);
+    if ((pro.x < 0) && (X > 0) && (X < kCamWidth - 1)) {
+      float lf_val = this->cam_mats_[0].x_pro[0].at<double>(Y, X - 1);
+      float rt_val = this->cam_mats_[0].x_pro[0].at<double>(Y, X + 1);
+      if ((lf_val > 0) && (rt_val > 0)) {
+        pro.x = (lf_val + rt_val) / 2;
+      }
+    }
     pro.y = this->cam_mats_[0].y_pro[0].at<double>(Y, X);
+    if ((pro.y < 0) && (Y > 0) && (Y < kCamHeight - 1)) {
+      float up_val = this->cam_mats_[0].y_pro[0].at<double>(Y - 1, X);
+      float dn_val = this->cam_mats_[0].y_pro[0].at<double>(Y + 1, X);
+      if ((up_val > 0) && (dn_val > 0)) {
+        pro.y = (up_val + dn_val) / 2;
+      }
+    }
     this->tmp_pro_points_.push_back(pro);
   }
   // Draw it
