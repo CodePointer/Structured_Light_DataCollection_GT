@@ -52,13 +52,13 @@ bool DataCollector::Init() {
 	this->hphase_name_ = "hPhase";
 	this->phase_suffix_ = ".bmp";
 	// this->dyna_name_ = "part_pattern_2size4color";
-	this->dyna_name_ = "pattern_2size4color";
+	this->dyna_name_ = "pattern_2size2color";
 	this->dyna_suffix_ = ".png";
-	this->wait_name_ = "pattern_2size4color";
+	this->wait_name_ = "pattern_2size2color";
 	this->wait_suffix_ = ".png";
 
 	// storage paths
-	this->save_data_path_ = "E:/Structured_Light_Data/20171121/";
+	this->save_data_path_ = "E:/Structured_Light_Data/20171123/";
 	this->dyna_frame_path_ = "dyna/";
 	this->dyna_frame_name_ = "dyna_mat";
 	this->dyna_frame_suffix_ = ".png";
