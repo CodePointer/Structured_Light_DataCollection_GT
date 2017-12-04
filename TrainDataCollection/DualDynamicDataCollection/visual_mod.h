@@ -3,6 +3,7 @@
 
 #include <string>
 #include <opencv2/opencv.hpp>
+#include "static_para.h"
 
 using namespace std;
 using namespace cv;
@@ -16,7 +17,7 @@ public:
 	VisualModule(string win_name);
 	~VisualModule();
 	int Show(Mat pic, int time, bool norm = false, double zoom = 1.0);
-  int CombineShow(Mat * pics, int num, int time, double zoom = 1.0);
+  int CombineShow(Mat * pics, int num, int time, Mat mask, double zoom = 1.0);
 };
 
 #endif

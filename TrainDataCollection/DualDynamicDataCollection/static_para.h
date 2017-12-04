@@ -26,6 +26,7 @@ extern const int kPhaseNum;
 // Visualization parameters
 extern const int kShowPictureTime;
 extern const bool kVisualFlagForDebug;
+extern const int kPointPerPixelNum;
 
 // Chess board parameters
 extern const int kChessFrameNumber;

@@ -20,6 +20,7 @@ const int kPhaseNum = 4;
 // Visualization 相关参数
 const int kShowPictureTime = 500;
 const bool kVisualFlagForDebug = false;
+const int kPointPerPixelNum = 10;
 
 //// 棋盘格相关参数
 const int kChessFrameNumber = 15;

@@ -38,6 +38,7 @@ private:
   string wait_suffix_;
   // storage data
   CamMatSet * cam_mats_;
+  Mat cam_mask_;
 	// storage paths
 	string save_data_path_;
 	string dyna_frame_path_;

@@ -64,12 +64,21 @@ int VisualModule::Show(Mat pic, int time, bool norm, double zoom) {
 	return waitKey(time);
 }
 
-int VisualModule::CombineShow(Mat * pics, int num, int time, double zoom) {
+int VisualModule::CombineShow(Mat * pics, int num, int time, Mat mask, double zoom) {
   Mat combine_mat, show_mat;
   //Size combine_size = Size(pic.size().width * num, pic.size().height);
   Size show_size = Size(pics[0].size().width*zoom*num, pics[0].size().height*zoom);
   // Combine part: hconcat(B,C,A);
-  Mat mat_B = pics[0];
+  Mat mat_B;
+  pics[0].copyTo(mat_B);
+  for (int h = 0; h < kCamHeight; h++) {
+    for (int w = 0; w < kCamWidth; w++) {
+      int pix_num = this->cam_mask_.at<uchar>(h, w);
+      if (pix_num >= kPointPerPixelNum) {
+        mat_B.at<uchar>(h, w) = 255;
+      }
+    }
+  }
   Mat mat_C;
   for (int i = 1; i < num; i++) {
 	  mat_C = pics[i];

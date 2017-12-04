@@ -164,6 +164,7 @@ bool DataCollector::CollectStatData() {
   int max_group_num = 5;
 
   printf("Begin collection.\n");
+  this->cam_mask_.create(kCamHeight, kCamWidth, CV_8UC1);
   while (now_group_idx++ <= max_group_num) {
     printf("Now group: %d\n", now_group_idx);
     // First create folder for now group
@@ -172,6 +173,7 @@ bool DataCollector::CollectStatData() {
     ss << now_group_idx;
     ss >> idx2str;
     StorageModule storage;
+    this->cam_mask_.setTo(0);
     
     // Collect each frames
     bool exit_flag = false;
@@ -218,6 +220,16 @@ bool DataCollector::CollectStatData() {
       }
       if (status) {
         this->StorageDataByFrame(now_group_idx, frame_idx);
+        // Set Mask_mat
+        for (int h = 0; h < kCamHeight; h++) {
+          for (int w = 0; w < kCamWidth; h++) {
+            double x_val = this->cam_mats_[frame_idx].x_pro.at<double>(h, w);
+            double y_val = this->cam_mats_[frame_idx].y_pro.at<double>(h, w);
+            if ((x_val > 0) && (y_val > 0)) {
+              this->cam_mast_.at<uchar>(h, w) += 1;
+            }
+          }
+        }
       } else {
         frame_idx--;
         status = true;
@@ -259,8 +271,10 @@ int DataCollector::GetInputSignal() {
         cam_tmp[cam_idx] = this->sensor_manager_->GetCamPicture(cam_idx);
         ltt_tmp[cam_idx] = cam_tmp[cam_idx](Range(502, 523), Range(630, 651));
 		  }
-      int key1 = this->res_view_->CombineShow(cam_tmp, kCamDeviceNum, 100, 0.5);
-      int key2 = this->cam_view_->CombineShow(ltt_tmp, kCamDeviceNum, 100, 20);
+      int key1 = this->res_view_->CombineShow(cam_tmp, kCamDeviceNum, 100, 
+                                              this->cam_mask_, 0.5);
+      int key2 = this->cam_view_->CombineShow(ltt_tmp, kCamDeviceNum, 100, 
+                                              this->cam_mask_, 20);
       if ((key1 == 'y') || (key2 == 'y')) {
         info = 0;
         break;
