@@ -34,6 +34,9 @@ private:
   Mat pro_distor_;
   int stereo_size_;
   StereoCalibSet * stereo_set_;
+  // Visual
+  VisualModule * cam_visual_;
+  VisualModule * pro_visual_;
 
   bool ReleaseSpace();			//  Õ∑≈ø’º‰
   bool RecoChessPointObj(int frameIdx);		// ÃÓ≥‰m_objPoint

@@ -90,7 +90,7 @@ bool SensorManager::LoadPatterns(int pattern_num, string file_path,
     tmp_mat.copyTo(this->pattern_mats_[i]);
 
 		if (tmp_mat.empty()) {
-			ErrorHandling("SensorManager::LoadPatterns::<Read>, imread error, file_path:" + file_name);
+			ErrorHandling("SensorManager::LoadPatterns::<Read>, imread error, file_path:" + read_path);
 		}
 	}
 	return true;

@@ -1,8 +1,6 @@
 #include "calibrator.h"
 
 //CVisualization myDebug("Debug");
-VisualModule cam_visual("CameraShow");
-VisualModule pro_visual("ProjectorShow");
 
 // Set NULL to pointers
 Calibrator::Calibrator() {
@@ -13,6 +11,8 @@ Calibrator::Calibrator() {
   this->cam_matrix_ = NULL;
   this->cam_distor_ = NULL;
   this->stereo_set_ = NULL;
+  this->cam_visual_ = nullptr;
+  this->pro_visual_ = nullptr;
 }
 
 // Release
@@ -50,6 +50,14 @@ bool Calibrator::ReleaseSpace() {
     delete[](this->stereo_set_);
     this->stereo_set_ = NULL;
   }
+  if (this->cam_visual_ != NULL) {
+    delete(this->cam_visual_);
+    this->cam_visual_ = NULL;
+  }
+  if (this->pro_visual_ != NULL) {
+    delete(this->pro_visual_);
+    this->pro_visual_ = NULL;
+  }
   return true;
 }
 
@@ -81,6 +89,8 @@ bool Calibrator::Init() {
   this->cam_matrix_ = new Mat[kCamDeviceNum];
   this->cam_distor_ = new Mat[kCamDeviceNum];
   this->stereo_set_ = new StereoCalibSet[kStereoSize];
+  this->cam_visual_ = new VisualModule("CameraShow");
+  this->pro_visual_ = new VisualModule("ProjectorShow");
   return true;
 }
 
@@ -89,6 +99,8 @@ bool Calibrator::Calibrate() {
   bool status = true;
   Mat * cam_tmp;
   cam_tmp = new Mat[kCamDeviceNum];
+  Mat cam_mask(kCamHeight, kCamWidth, CV_8UC1);
+  cam_mask.setTo(0);
   // Chess Reco
   for (int frm_idx = 0; frm_idx < kChessFrameNumber; frm_idx++) {
     // set projected pattern as empty
@@ -100,7 +112,7 @@ bool Calibrator::Calibrate() {
         cam_tmp[cam_idx] = this->sensor_->GetCamPicture(cam_idx);
       }
       int key;
-      key = cam_visual.CombineShow(cam_tmp, 2, 100, 0.5);
+      key = this->cam_visual_->CombineShow(cam_tmp, 2, 100, cam_mask, 0.5);
       if (key == 'y') {
         break;
       }
@@ -301,6 +313,8 @@ bool Calibrator::RecoChessPointCam(int frameIdx) {
   }
   Mat * cam_tmp;
   cam_tmp = new Mat[kCamDeviceNum];
+  Mat cam_mask(kCamHeight, kCamWidth, CV_8UC1);
+  cam_mask.setTo(0);
   // Set picture
   this->sensor_->LoadPatterns(1, this->pattern_path_, "empty", ".bmp");
   this->sensor_->SetProPicture(0);
@@ -310,7 +324,7 @@ bool Calibrator::RecoChessPointCam(int frameIdx) {
     for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
       cam_tmp[cam_idx] = this->sensor_->GetCamPicture(cam_idx);
     }
-    cam_visual.CombineShow(cam_tmp, kCamDeviceNum, 100, 0.5);
+    this->cam_visual_->CombineShow(cam_tmp, kCamDeviceNum, 100, cam_mask, 0.5);
     for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
       int max_attempt_times = 1;
       int k = 0;
@@ -323,7 +337,7 @@ bool Calibrator::RecoChessPointCam(int frameIdx) {
         /*drawChessboardCorners(
             cam_tmp[cam_idx], Size(kChessHeight, kChessWidth), 
             this->tmp_cam_points_[cam_idx], found);*/
-        pro_visual.Show(cam_tmp[cam_idx], 100, false, 0.5);
+        this->pro_visual_->Show(cam_tmp[cam_idx], 100, false, 0.5);
         if (found) {
           printf("Success for cam[%d].\n", cam_idx);
           break;
@@ -343,11 +357,11 @@ bool Calibrator::RecoChessPointCam(int frameIdx) {
         drawChessboardCorners(
             draw_mat, Size(kChessHeight, kChessWidth),
             this->tmp_cam_points_[cam_idx], found);
-        pro_visual.Show(draw_mat, 100, false, 0.5);
+        this->pro_visual_->Show(draw_mat, 100, false, 0.5);
       }
     }
     if (reco_flag) {
-      cam_visual.CombineShow(cam_tmp, 2, 100, 0.5);
+      this->cam_visual_->CombineShow(cam_tmp, 2, 100, cam_mask, 0.5);
       break;
     }
   }
@@ -565,7 +579,7 @@ bool Calibrator::RecoChessPointPro(int frameIdx) {
   draw_mat.setTo(0);
   drawChessboardCorners(
       draw_mat, Size(kChessHeight, kChessWidth), this->tmp_pro_points_, true);
-  int key = pro_visual.Show(draw_mat, 0, false, 0.5);
+  int key = this->pro_visual_->Show(draw_mat, 0, false, 0.5);
   if (key == 'y') {
     status = true;
   } else {

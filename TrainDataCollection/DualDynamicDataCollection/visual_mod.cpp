@@ -71,11 +71,13 @@ int VisualModule::CombineShow(Mat * pics, int num, int time, Mat mask, double zo
   // Combine part: hconcat(B,C,A);
   Mat mat_B;
   pics[0].copyTo(mat_B);
-  for (int h = 0; h < kCamHeight; h++) {
-    for (int w = 0; w < kCamWidth; w++) {
-      int pix_num = this->cam_mask_.at<uchar>(h, w);
-      if (pix_num >= kPointPerPixelNum) {
-        mat_B.at<uchar>(h, w) = 255;
+  if (mat_B.size() == mask.size()) {
+    for (int h = 0; h < kCamHeight; h++) {
+      for (int w = 0; w < kCamWidth; w++) {
+        int pix_num = mask.at<uchar>(h, w);
+        if (pix_num >= kPointPerPixelNum) {
+          mat_B.at<uchar>(h, w) = 255;
+        }
       }
     }
   }

@@ -52,13 +52,13 @@ bool DataCollector::Init() {
 	this->hphase_name_ = "hPhase";
 	this->phase_suffix_ = ".bmp";
 	// this->dyna_name_ = "part_pattern_2size4color";
-	this->dyna_name_ = "pattern_2size2color";
+	this->dyna_name_ = "pattern_2size2color8P";
 	this->dyna_suffix_ = ".png";
-	this->wait_name_ = "pattern_2size2color";
+	this->wait_name_ = "pattern_2size2color8P";
 	this->wait_suffix_ = ".png";
 
 	// storage paths
-	this->save_data_path_ = "E:/Structured_Light_Data/20171123/";
+	this->save_data_path_ = "E:/Structured_Light_Data/20171205/";
 	this->dyna_frame_path_ = "dyna/";
 	this->dyna_frame_name_ = "dyna_mat";
 	this->dyna_frame_suffix_ = ".png";
@@ -222,11 +222,11 @@ bool DataCollector::CollectStatData() {
         this->StorageDataByFrame(now_group_idx, frame_idx);
         // Set Mask_mat
         for (int h = 0; h < kCamHeight; h++) {
-          for (int w = 0; w < kCamWidth; h++) {
-            double x_val = this->cam_mats_[frame_idx].x_pro.at<double>(h, w);
-            double y_val = this->cam_mats_[frame_idx].y_pro.at<double>(h, w);
+          for (int w = 0; w < kCamWidth; w++) {
+            double x_val = this->cam_mats_[0].x_pro[frame_idx].at<double>(h, w);
+            double y_val = this->cam_mats_[0].y_pro[frame_idx].at<double>(h, w);
             if ((x_val > 0) && (y_val > 0)) {
-              this->cam_mast_.at<uchar>(h, w) += 1;
+              this->cam_mask_.at<uchar>(h, w) += 1;
             }
           }
         }
@@ -299,7 +299,7 @@ int DataCollector::GetInputSignal() {
 // Collect first frame
 bool DataCollector::CollectStaticFrame(int frameNum) {
 	bool status = true;
-	int kMultiCollectNum = 3;
+	int kMultiCollectNum = 1;
 	Mat tmp_mul_collect;
 	Mat temp_total_mat;
 	Mat temp_mat;

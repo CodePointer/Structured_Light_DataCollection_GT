@@ -1,7 +1,19 @@
-﻿  data_collector.cpp
+﻿  calibrator.cpp
 e:\programenvironment\opencv\build\include\opencv2\core\mat.hpp(2586): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 e:\programenvironment\opencv\build\include\opencv2\core\persistence.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 e:\programenvironment\opencv\build\include\opencv2\core\utility.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 e:\programenvironment\opencv\build\include\opencv2\core\utility.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 e:\programenvironment\opencv\build\include\opencv2\imgproc.hpp(592): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+e:\github\traindatacollection\traindatacollection\dualdynamicdatacollection\calibrator.cpp(302): warning C4244: “参数”: 从“int”转换到“float”，可能丢失数据
+e:\github\traindatacollection\traindatacollection\dualdynamicdatacollection\calibrator.cpp(359): warning C4800: “int”: 将值强制为布尔值“true”或“false”(性能警告)
+e:\github\traindatacollection\traindatacollection\dualdynamicdatacollection\calibrator.cpp(455): warning C4554: “<<”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+e:\github\traindatacollection\traindatacollection\dualdynamicdatacollection\calibrator.cpp(463): warning C4554: “<<”: 检查运算符优先级可能存在的错误；使用圆括号阐明优先级
+e:\github\traindatacollection\traindatacollection\dualdynamicdatacollection\calibrator.cpp(556): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
+e:\github\traindatacollection\traindatacollection\dualdynamicdatacollection\calibrator.cpp(557): warning C4244: “初始化”: 从“float”转换到“int”，可能丢失数据
+e:\github\traindatacollection\traindatacollection\dualdynamicdatacollection\calibrator.cpp(558): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+e:\github\traindatacollection\traindatacollection\dualdynamicdatacollection\calibrator.cpp(560): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+e:\github\traindatacollection\traindatacollection\dualdynamicdatacollection\calibrator.cpp(561): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+e:\github\traindatacollection\traindatacollection\dualdynamicdatacollection\calibrator.cpp(566): warning C4244: “=”: 从“double”转换到“float”，可能丢失数据
+e:\github\traindatacollection\traindatacollection\dualdynamicdatacollection\calibrator.cpp(568): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
+e:\github\traindatacollection\traindatacollection\dualdynamicdatacollection\calibrator.cpp(569): warning C4244: “初始化”: 从“double”转换到“float”，可能丢失数据
   DualDynamicDataCollection.vcxproj -> E:\Github\TrainDataCollection\TrainDataCollection\x64\Debug\DualDynamicDataCollection.exe

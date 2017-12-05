@@ -18,6 +18,8 @@ int main()
 }
 
 //#include "calibrator.h"
+//VisualModule cam_visual("CameraShow");
+//VisualModule pro_visual("ProjectorShow");
 //
 //int main()
 //{
