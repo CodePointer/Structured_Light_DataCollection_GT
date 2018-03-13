@@ -1,0 +1,10 @@
+*.tlog
+*.log
+*.ipdb
+*.pdb
+*.obj
+*.suo
+*.sdf
+*.pdb
+*.txt
+*.xml

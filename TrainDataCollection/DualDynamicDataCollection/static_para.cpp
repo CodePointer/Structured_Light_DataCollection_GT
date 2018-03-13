@@ -38,7 +38,7 @@ const string kProVerPhaseName = "vPhase";
 const string kProDynaName = "dynaMat";
 const string kProWaitName = "wait";
 const string kProFileSuffix = ".bmp";
-const int kCamDeviceNum = 2;
+const int kCamDeviceNum = 1;
 
 // Used for mats storage
 CamMatSet::CamMatSet() {

@@ -71,6 +71,7 @@ public:
 	bool Init();
 	bool CollectDynaData();
   bool CollectStatData();
+  bool CollectPlaneData();
 	bool Close();
 };
 

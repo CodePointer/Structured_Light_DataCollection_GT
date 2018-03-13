@@ -112,13 +112,14 @@ bool Calibrator::Calibrate() {
         cam_tmp[cam_idx] = this->sensor_->GetCamPicture(cam_idx);
       }
       int key;
-      key = this->cam_visual_->CombineShow(cam_tmp, 2, 100, cam_mask, 0.5);
+      key = this->cam_visual_->Show(cam_tmp[0], 100, false, 0.5);
+      //key = this->cam_visual_->CombineShow(cam_tmp, 2, 100, cam_mask, 0.5);
       if (key == 'y') {
         break;
       }
     }
     this->sensor_->UnloadPatterns();
-    this->sensor_->LoadPatterns(1, this->pattern_path_, "empty", ".bmp");
+    this->sensor_->LoadPatterns(1, this->pattern_path_, "empty", ".png");
     this->sensor_->SetProPicture(0);
     this->sensor_->UnloadPatterns();
 
@@ -316,7 +317,7 @@ bool Calibrator::RecoChessPointCam(int frameIdx) {
   Mat cam_mask(kCamHeight, kCamWidth, CV_8UC1);
   cam_mask.setTo(0);
   // Set picture
-  this->sensor_->LoadPatterns(1, this->pattern_path_, "empty", ".bmp");
+  this->sensor_->LoadPatterns(1, this->pattern_path_, "empty", ".png");
   this->sensor_->SetProPicture(0);
   this->sensor_->UnloadPatterns();
   while (true) {
@@ -324,7 +325,8 @@ bool Calibrator::RecoChessPointCam(int frameIdx) {
     for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
       cam_tmp[cam_idx] = this->sensor_->GetCamPicture(cam_idx);
     }
-    this->cam_visual_->CombineShow(cam_tmp, kCamDeviceNum, 100, cam_mask, 0.5);
+    //this->cam_visual_->CombineShow(cam_tmp, kCamDeviceNum, 100, cam_mask, 0.5);
+    this->cam_visual_->Show(cam_tmp[0], 100, false, 0.5);
     for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
       int max_attempt_times = 1;
       int k = 0;
@@ -361,7 +363,8 @@ bool Calibrator::RecoChessPointCam(int frameIdx) {
       }
     }
     if (reco_flag) {
-      this->cam_visual_->CombineShow(cam_tmp, 2, 100, cam_mask, 0.5);
+      //this->cam_visual_->CombineShow(cam_tmp, 2, 100, cam_mask, 0.5);
+      this->cam_visual_->Show(cam_tmp[0], 100, false, 0.5);
       break;
     }
   }

@@ -51,14 +51,14 @@ bool DataCollector::Init() {
 	this->vphase_name_ = "vPhase";
 	this->hphase_name_ = "hPhase";
 	this->phase_suffix_ = ".bmp";
-	// this->dyna_name_ = "part_pattern_2size4color";
-	this->dyna_name_ = "pattern_2size2color8P";
+	this->dyna_name_ = "pattern_3size2color";
+	//this->dyna_name_ = "empty";
 	this->dyna_suffix_ = ".png";
-	this->wait_name_ = "pattern_2size2color8P";
+	this->wait_name_ = "pattern_3size2color";
 	this->wait_suffix_ = ".png";
 
 	// storage paths
-	this->save_data_path_ = "E:/Structured_Light_Data/20171205/";
+	this->save_data_path_ = "E:/Structured_Light_Data/20180313/";
 	this->dyna_frame_path_ = "dyna/";
 	this->dyna_frame_name_ = "dyna_mat";
 	this->dyna_frame_suffix_ = ".png";
@@ -241,6 +241,108 @@ bool DataCollector::CollectStatData() {
   return status;
 }
 
+bool DataCollector::CollectPlaneData() {
+  bool status = true;
+  int now_group_idx = 0;
+  int max_group_num = 5;
+
+  printf("Begin collection.\n");
+  this->cam_mask_.create(kCamHeight, kCamWidth, CV_8UC1);
+  while (now_group_idx++ <= max_group_num) {
+    printf("Now group: %d\n", now_group_idx);
+    // First create folder for now group
+    //string idx2str;
+    //stringstream ss;
+    //ss << now_group_idx;
+    //ss >> idx2str;
+    //StorageModule storage;
+    //this->cam_mask_.setTo(0);
+
+    // Collect each frames
+    bool exit_flag = false;
+    for (int frame_idx = 0; frame_idx < this->max_frame_num_; frame_idx++) {
+      // Wait for signal
+      printf("frm[%d]:\n", frame_idx);
+      if (status) {
+        //this->wait_name_ = "pattern_9p";
+        int info = this->GetInputSignal();
+        if (info == 2) { // End this program
+          exit_flag = true;
+          break;
+        }
+        else if (info == 1) { // End this group
+          break;
+        }
+      }
+      // Collect dyna frame
+      if (status) {
+        status = this->sensor_manager_->LoadPatterns(1,
+          this->pattern_path_,
+          this->dyna_name_,
+          this->dyna_suffix_);
+      }
+      if (status) {
+        status = this->sensor_manager_->SetProPicture(0);
+      }
+      if (status) {
+        for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
+          Mat Cam_mat = this->sensor_manager_->GetCamPicture(cam_idx);
+          Cam_mat.copyTo(this->cam_mats_[cam_idx].dyna[frame_idx]);
+        }
+        status = this->sensor_manager_->UnloadPatterns();
+      }
+      // Collect plane frame
+      if (status) {
+        status = this->sensor_manager_->LoadPatterns(1,
+          this->pattern_path_,
+          "pattern_9p",
+          this->dyna_suffix_);
+      }
+      if (status) {
+        status = this->sensor_manager_->SetProPicture(0);
+      }
+      if (status) {
+        for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
+          Mat Cam_mat = this->sensor_manager_->GetCamPicture(cam_idx);
+          Cam_mat.copyTo(this->cam_mats_[cam_idx].x_pro[frame_idx]);
+        }
+        status = this->sensor_manager_->UnloadPatterns();
+      }
+      // Storage
+      if (status) {
+        stringstream ss;
+        ss << now_group_idx << "/";
+        string group_folder_path;
+        ss >> group_folder_path;
+        StorageModule store;
+        for (int cam_idx = 0; cam_idx < kCamDeviceNum; cam_idx++) {
+          // CamFolderInfo
+          stringstream ss_cam;
+          ss_cam << "cam_" << cam_idx << "/";
+          string cam_folder_path;
+          ss_cam >> cam_folder_path;
+
+          // Save dyna mats
+          store.SetMatFileName(
+            this->save_data_path_ + group_folder_path + cam_folder_path
+            + this->dyna_frame_path_, this->dyna_frame_name_,
+            this->dyna_frame_suffix_);
+          store.StoreAsImage(&this->cam_mats_[cam_idx].dyna[frame_idx], 1, frame_idx);
+          // Save plane mats
+          store.SetMatFileName(
+            this->save_data_path_ + group_folder_path + cam_folder_path
+            + this->dyna_frame_path_, "dot_mat",
+            this->dyna_frame_suffix_);
+          store.StoreAsImage(&this->cam_mats_[cam_idx].x_pro[frame_idx], 1, frame_idx);
+        }
+      }
+    }
+    if (exit_flag)
+      break;
+  }
+  return status;
+}
+
 // return:
 //     0: Continue
 //     1: End collection of this group
@@ -271,12 +373,15 @@ int DataCollector::GetInputSignal() {
         cam_tmp[cam_idx] = this->sensor_manager_->GetCamPicture(cam_idx);
         ltt_tmp[cam_idx] = cam_tmp[cam_idx](Range(502, 523), Range(630, 651));
 		  }
-      int key1 = this->res_view_->CombineShow(cam_tmp, kCamDeviceNum, 100, 
+      int key1 = this->res_view_->Show(cam_tmp[0], 100, false, 0.5);
+      int key2 = this->cam_view_->Show(ltt_tmp[0], 100, false, 20);
+      /*int key1 = this->res_view_->CombineShow(cam_tmp, kCamDeviceNum, 100, 
                                               this->cam_mask_, 0.5);
       int key2 = this->cam_view_->CombineShow(ltt_tmp, kCamDeviceNum, 100, 
-                                              this->cam_mask_, 20);
+                                              this->cam_mask_, 20);*/
       if ((key1 == 'y') || (key2 == 'y')) {
         info = 0;
+        //Sleep(5000);
         break;
       } else if ((key1 == 'n') || (key2 == 'n')) {
         info = 1;

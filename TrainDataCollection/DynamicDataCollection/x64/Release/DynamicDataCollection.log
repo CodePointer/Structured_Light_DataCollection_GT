@@ -52,15 +52,15 @@ E:\ProgramEnvironment\opencv\build\include\opencv2/core/utility.hpp : warning C4
 E:\ProgramEnvironment\opencv\build\include\opencv2/core/utility.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 E:\ProgramEnvironment\opencv\build\include\opencv2/imgproc.hpp(592): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 CVisualization.cpp(17): warning C4244: “参数”: 从“double”转换到“int”，可能丢失数据
+  GlobalFunction.cpp
   main.cpp
 E:\ProgramEnvironment\opencv\build\include\opencv2/core/mat.hpp(2586): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 E:\ProgramEnvironment\opencv\build\include\opencv2/core/persistence.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 E:\ProgramEnvironment\opencv\build\include\opencv2/core/utility.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 E:\ProgramEnvironment\opencv\build\include\opencv2/core/utility.hpp : warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
 E:\ProgramEnvironment\opencv\build\include\opencv2/imgproc.hpp(592): warning C4819: 该文件包含不能在当前代码页(936)中表示的字符。请将该文件保存为 Unicode 格式以防止数据丢失
+  StaticParameters.cpp
   正在生成代码
-  70 of 556 functions (12.6%) were compiled, the rest were copied from previous compilation.
-    68 functions were new in current compilation
-    0 functions had inline decision re-evaluated but remain unchanged
+  All 556 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   已完成代码的生成
   DynamicDataCollection.vcxproj -> E:\Github\TrainDataCollection\TrainDataCollection\x64\Release\DynamicDataCollection.exe
